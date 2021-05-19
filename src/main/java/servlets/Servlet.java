@@ -11,7 +11,6 @@ import java.util.*;
 
 public class Servlet extends HttpServlet {
 
-    private Connection conn ;
     private Dispatcher dispatcher;
 
     @Override
