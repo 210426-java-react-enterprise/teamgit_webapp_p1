@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Servlet extends HttpServlet {
 
-    private Dispatcher dispatcher;
+    private Dispatcher dispatcher = new Dispatcher();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -7,26 +7,19 @@ import java.util.regex.*;
 
 public class UserService {
 
-    private UserRepo userRepo;
-
-    public UserService(UserRepo userRepo){
-        this.userRepo = userRepo;
-    }
-
-
-    //TODO pending implementation
-    public boolean isEmailAvailable(String email){
+    //TODO implementation
+    public boolean authenticateUniqueCredentials(String username, String email, UserRepo userRepo){
+        AppUser user = new AppUser();
+        user.setUsername(username);
+        user.setEmail(email);
+        userRepo.isUsernameAvailable(user);
+        userRepo.isEmailAvailable(user);
         return false;
     }
-    //TODO pending implementation
-    public boolean isUsernameAvailable(String username){
-        return false;
-    }
-
     //TODO authenticate username and password
-    public boolean authenticateUserCredentials(AppUser user){
+    public boolean authenticateUserCredentials(AppUser user, UserRepo userRepo){
 
-        AppUser currentUser = (AppUser) userRepo.findUserByUsernameAndPassword(user);
+        //AppUser currentUser = (AppUser) userRepo.findUserByUsernameAndPassword(user);
 
         //if currentUser returns null, then return false
         //if currentUser returns not null, then return true
@@ -40,7 +33,7 @@ public class UserService {
      * @param deposit_am
      */
     //TODO implement depositVerify
-    public void depositVerify(double deposit_am){
+    public void depositVerify(double deposit_am, UserRepo userRepo){
 //        if (deposit_am < 0) {
 //            System.out.println("Deposit value must be positive!");
 //        } else{
@@ -54,7 +47,7 @@ public class UserService {
      * @param withdraw_am
      */
     //TODO implement withdrawVerify
-    public void withdrawVerify(double withdraw_am){
+    public void withdrawVerify(double withdraw_am, UserRepo userRepo){
 //        if (withdraw_am < 0 || withdraw_am > AccountRepo.fetchBalance(getId())) {
 //            System.out.println("Withdrawal value must be greater than zero and less than account balance!");
 //        } else{
@@ -62,11 +55,11 @@ public class UserService {
 //        }
     }
 
-    public boolean isUserValid(AppUser user) {
+    public String isUserValid(AppUser user) {
 
-        boolean check = true;
+        //boolean check = true;
 
-        if (user == null) return false;
+        if (user == null) return "";
         //Regex expression to check for usernames of length 3-20
         String regexUsername = "^[a-zA-Z0-9]([a-zA-Z0-9._-]){1,18}[a-zA-Z0-9]$";
 
@@ -87,32 +80,32 @@ public class UserService {
         StringBuilder message = new StringBuilder();
         if(!Pattern.matches(regexUsername, user.getUsername())){
             message.append("Username input was not valid.\n");
-            check = false;
+            //check = false;
         }
         if(!Pattern.matches(regexPassword, user.getPassword())){
             message.append("Password input was not valid.\n");
-            check = false;
+            //check = false;
         }
         if(!Pattern.matches(regexEmail, user.getEmail())){
             message.append("Email input was not valid.\n");
-            check = false;
+            //check = false;
         }
         if(!Pattern.matches(regexName, user.getFirstName())){
             message.append("First name input was not valid.\n");
-            check = false;
+            //check = false;
         }
         if(!Pattern.matches(regexName, user.getLastName())){
             message.append("Last name input was not valid.\n");
-            check = false;
+            //check = false;
         }
         if(!Pattern.matches(regexDob, user.getDob())){
             message.append("Date of birth input was not valid.\n");
-            check = false;
+            //check = false;
         }
 
         System.err.println(message);
 
-        return check;
+        return message.toString();
     }
 
 }
