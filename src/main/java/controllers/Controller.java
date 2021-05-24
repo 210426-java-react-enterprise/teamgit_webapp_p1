@@ -2,17 +2,19 @@ package controllers;
 
 
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import models.*;
 import repos.*;
 import services.*;
 
 import javax.servlet.http.*;
 import java.io.*;
+import java.sql.Connection;
 
 
 public class Controller {
 
-    UserRepo userRepo = new UserRepo();
+    Repo Repo = new Repo();
     UserService userService = new UserService();
 
     //TODO implement register
@@ -35,21 +37,19 @@ public class Controller {
         System.out.println("invalidUserMessage: " + invalidUserMessage);
 
 
-        if(invalidUserMessage == ""
-                && userService.authenticateUniqueCredentials(username, email, userRepo)){
+        try{
             // 3. save the user in the db with the register method from the service
+            Repo.insert(user);
             //TODO might want it to return an AppUser instead of void
-             //AppUser idUser = userRepo.save(user);
-            userRepo.save(user);
-        }
-        else{
-            //if user is invalid, it'll send a response with a message of what went wrong
+            Repo.select(user);
+        }catch(MismatchedInputException e){
+        //let them now that if we catch a mismatch then the client did something wrong
             resp.setStatus(400);
-            resp.getWriter().println("We found an error with your registration: \n"
-                   + invalidUserMessage);
-       }
-
+            System.out.println(e.getMessage());
     }
+
+
+}
 
     //TODO implement authenticate
     public void authenticate(HttpServletRequest req, HttpServletResponse resp) {
@@ -58,19 +58,19 @@ public class Controller {
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(password);
-        userService.authenticateUserCredentials(user, userRepo);
+        userService.authenticateUserCredentials(user, Repo);
     }
 
     //TODO implement validateDeposit
     public void validateDeposit(HttpServletRequest req, HttpServletResponse resp) {
         double deposit_am = 0.0;
-        userService.depositVerify(deposit_am, userRepo);
+        userService.depositVerify(deposit_am, Repo);
     }
 
     //TODO implement validateWithdrawal
     public void validateWithdrawal(HttpServletRequest req, HttpServletResponse resp) {
         double withdraw_am = 0.0;
-        userService.withdrawVerify(withdraw_am, userRepo);
+        userService.withdrawVerify(withdraw_am, Repo);
     }
 
     //public void isUsername
