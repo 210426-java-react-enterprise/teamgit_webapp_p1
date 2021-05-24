@@ -18,7 +18,7 @@ public class Controller {
     UserService userService = new UserService();
 
     //TODO implement register
-    public void register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public Object register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         //Acquire parameters
         String firstName = req.getParameter("firstName");
@@ -41,7 +41,7 @@ public class Controller {
             // 3. save the user in the db with the register method from the service
             Repo.insert(user);
             //TODO might want it to return an AppUser instead of void
-            Repo.select(user);
+            return Repo.select(user);
         }catch(MismatchedInputException e){
         //let them now that if we catch a mismatch then the client did something wrong
             resp.setStatus(400);
@@ -52,13 +52,14 @@ public class Controller {
 }
 
     //TODO implement authenticate
-    public void authenticate(HttpServletRequest req, HttpServletResponse resp) {
+    public Object authenticate(HttpServletRequest req, HttpServletResponse resp) {
         String username = "";
         String password = "";
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(password);
         userService.authenticateUserCredentials(user, Repo);
+        return Repo.select(user);
     }
 
     //TODO implement validateDeposit
