@@ -5,19 +5,20 @@ import repos.*;
 
 import java.util.regex.*;
 
+@Deprecated
 public class UserService {
 
     //TODO implementation
-    public boolean authenticateUniqueCredentials(String username, String email, UserRepo userRepo){
+    public boolean authenticateUniqueCredentials(String username, String email, Repo userRepo){
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setEmail(email);
-        userRepo.isUsernameAvailable(user);
-        userRepo.isEmailAvailable(user);
+//        userRepo.isUsernameAvailable(user);
+//        userRepo.isEmailAvailable(user);
         return false;
     }
     //TODO authenticate username and password
-    public boolean authenticateUserCredentials(AppUser user, UserRepo userRepo){
+    public boolean authenticateUserCredentials(AppUser user, Repo userRepo){
 
         //AppUser currentUser = (AppUser) userRepo.findUserByUsernameAndPassword(user);
 
@@ -33,7 +34,7 @@ public class UserService {
      * @param deposit_am
      */
     //TODO implement depositVerify
-    public void depositVerify(double deposit_am, UserRepo userRepo){
+    public void depositVerify(double deposit_am, Repo userRepo){
 //        if (deposit_am < 0) {
 //            System.out.println("Deposit value must be positive!");
 //        } else{
@@ -47,7 +48,7 @@ public class UserService {
      * @param withdraw_am
      */
     //TODO implement withdrawVerify
-    public void withdrawVerify(double withdraw_am, UserRepo userRepo){
+    public void withdrawVerify(double withdraw_am, Repo userRepo){
 //        if (withdraw_am < 0 || withdraw_am > AccountRepo.fetchBalance(getId())) {
 //            System.out.println("Withdrawal value must be greater than zero and less than account balance!");
 //        } else{

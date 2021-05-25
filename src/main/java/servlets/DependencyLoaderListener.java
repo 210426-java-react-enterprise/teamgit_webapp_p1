@@ -1,7 +1,10 @@
 package servlets;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import controllers.*;
+import dispatchers.*;
+import repos.*;
+
+import javax.servlet.*;
 
 public class DependencyLoaderListener implements ServletContextListener {
 
@@ -12,12 +15,26 @@ public class DependencyLoaderListener implements ServletContextListener {
 
     //YOU NEED TO INFORM TOMCAT THAT THIS EXISTS IN THE web.xml FILE
     @Override
-    public void contextInitialized(ServletContextEvent servletContextEvent) {
+    public void contextInitialized(ServletContextEvent sce) {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        Repo repo = new Repo();
+        UserController userController = new UserController(repo);
+        TransactionController transactionController = new TransactionController(repo);
+        Dispatcher dispatcher = new Dispatcher(userController, transactionController);
+
+        Servlet servlet = new Servlet(dispatcher);
+
+        ServletContext context = sce.getServletContext();
+        context.addServlet("Servlet", servlet).addMapping("*.data");
+
+
+
+
     }
 
     @Override
