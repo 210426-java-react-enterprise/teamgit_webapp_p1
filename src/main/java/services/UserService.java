@@ -6,6 +6,7 @@ import repos.*;
 import java.util.ArrayList;
 import java.util.regex.*;
 
+@Deprecated
 public class UserService {
 
     Repo Repo = new Repo();
