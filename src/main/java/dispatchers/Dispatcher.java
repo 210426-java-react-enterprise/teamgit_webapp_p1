@@ -24,11 +24,11 @@ public class Dispatcher {
                 break;
 
             case "/teamgit-webapp-p1/deposit.data":
-                transactionController.validateDeposit(req, resp);
+                transactionController.deposit(req, resp);
                 break;
 
             case"/teamgit-webapp-p1/withdraw.data":
-                transactionController.validateWithdrawal(req, resp);
+                transactionController.withdrawal(req, resp);
                 break;
             default:
                 resp.setStatus(400);

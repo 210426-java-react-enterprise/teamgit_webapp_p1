@@ -1,2 +1,4 @@
-package dtos;public class AccountDTO {
+package dtos;
+
+public class AccountDTO {
 }

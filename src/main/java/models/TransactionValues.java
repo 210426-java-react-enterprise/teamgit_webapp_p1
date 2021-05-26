@@ -68,7 +68,7 @@ public class TransactionValues {
     )
     private static String timestamp;
 
-    public TransactionValues() {
+    public TransactionValues(int account_id, double prev_bal, double change) {
     }
 
     @Setter(
