@@ -38,8 +38,8 @@ public class UserController {
 
         // 2. construct an AppUser with that information
         AppUser appUser = new AppUser(username, password, email, firstName, lastName, dob);
-        UserInformation user = new UserInformation(username, password, email, firstName, lastName, dob);
-        System.out.println(user);
+        //UserInformation user = new UserInformation(username, password, email, firstName, lastName, dob);
+        System.out.println(appUser);
 
         //regex to test input validity
         //String invalidUserMessage = userService.isUserValid(user);
@@ -49,7 +49,7 @@ public class UserController {
 
         //TODO might want it to return an AppUser instead of void
         repo.create(appUser);
-        repo.insert(user);
+        repo.insert(appUser);
         //AppUser registeredUser = (AppUser) repo.select(user).get(0);
 
         //using Jackson to map the user into a JSON

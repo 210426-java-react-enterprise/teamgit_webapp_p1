@@ -42,7 +42,6 @@ public class AppUser {
     @Column(name = "last_name", nullable = false, unique = false, type = "varchar", length = "25", updateable = true)
     private String lastName;
 
-
     @Column(name = "dob", nullable = false, unique = false, type = "date", updateable = false)
     private String dob;
 
