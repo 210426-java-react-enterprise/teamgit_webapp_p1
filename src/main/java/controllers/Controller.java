@@ -1,16 +1,11 @@
 package controllers;
 
-
-
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import models.*;
 import repos.*;
 import services.*;
 
 import javax.servlet.http.*;
 import java.io.*;
-import java.sql.Connection;
-
 
 public class Controller {
 
@@ -42,13 +37,13 @@ public class Controller {
             Repo.insert(user);
             //TODO might want it to return an AppUser instead of void
             return Repo.select(user);
-        }catch(MismatchedInputException e){
+        }catch(Exception e){
         //let them now that if we catch a mismatch then the client did something wrong
             resp.setStatus(400);
             System.out.println(e.getMessage());
     }
 
-
+    return null;
 }
 
     //TODO implement authenticate

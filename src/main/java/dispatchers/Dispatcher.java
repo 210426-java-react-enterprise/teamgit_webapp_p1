@@ -30,6 +30,12 @@ public class Dispatcher {
             case"/teamgit-webapp-p1/withdraw.data":
                 transactionController.withdrawal(req, resp);
                 break;
+            case"/teamgit-webapp-p1/balance.data":
+                transactionController.balance(req, resp);
+                break;
+            case"/teamgit-webapp-p1/transactions.data":
+                transactionController.transactions(req, resp);
+                break;
             default:
                 resp.setStatus(400);
                 resp.getWriter().println("The request uri was not recognized!");

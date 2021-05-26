@@ -1,12 +1,8 @@
 package models;
 
-import annotations.Column;
-import annotations.Connection;
-import annotations.Entity;
-import annotations.ForeignKey;
-import annotations.Id;
-import annotations.Setter;
-import annotations.Table;
+import annotations.*;
+
+import java.sql.Timestamp;
 
 @Entity
 @Connection(
@@ -41,6 +37,7 @@ public class TransactionValues {
             updateable = false
     )
     private static int account_id;
+
     @Column(
             name = "prev_bal",
             type = "double",
@@ -50,12 +47,12 @@ public class TransactionValues {
             updateable = false
     )
     private static double prev_bal;
+
     @Column(
             name = "change",
             type = "double",
             nullable = false,
             unique = false,
-            length = "12,2",
             updateable = false
     )
     private static double change;
@@ -66,9 +63,34 @@ public class TransactionValues {
             unique = false,
             updateable = false
     )
-    private static String timestamp;
+    private static Timestamp timestamp;
 
-    public TransactionValues(int account_id, double prev_bal, double change) {
+    public TransactionValues(int trans_id, int account_id, Timestamp timestamp, double prev_bal, double change) {
+    }
+
+    @Getter
+    public static int getTrans_id() {
+        return trans_id;
+    }
+
+    @Getter
+    public static int getAccount_id() {
+        return account_id;
+    }
+
+    @Getter
+    public static double getPrev_bal() {
+        return prev_bal;
+    }
+
+    @Getter
+    public static double getChange() {
+        return change;
+    }
+
+    @Getter
+    public static Timestamp getTimestamp() {
+        return timestamp;
     }
 
     @Setter(
@@ -102,7 +124,7 @@ public class TransactionValues {
     @Setter(
             name = "timestamp"
     )
-    public static void setTimestamp(String timestamp) {
+    public static void setTimestamp(Timestamp timestamp) {
         TransactionValues.timestamp = timestamp;
     }
 }

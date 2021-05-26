@@ -68,9 +68,10 @@ public class UserAccount {
         this.balance = balance;
     }
 
-    public UserAccount(int id, double balance) {
+    public UserAccount(int account_num,int id, double balance) {
         System.out.println("Registering user...");
         models.UserAccount.id = id;
         this.balance = balance;
+        this.account_num = account_num;
     }
 }
