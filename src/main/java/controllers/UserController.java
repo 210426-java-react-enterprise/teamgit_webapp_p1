@@ -61,7 +61,7 @@ public class UserController {
 
 
     //TODO implement authenticate
-    public void authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
@@ -84,12 +84,12 @@ public class UserController {
 
         if(authOutput.length() > 0) {
             writer.write(authOutput.toString());
+            return true;
         }else{
             writer.write("Authentication failed!");
+            return false;
         }
 
     }
-
-    //public void isUsername
 
 }
