@@ -22,10 +22,13 @@
           <element id="library" level="project" name="Maven: net.bytebuddy:byte-buddy-agent:1.10.20" />
           <element id="library" level="project" name="Maven: org.objenesis:objenesis:3.2" />
           <element id="library" level="project" name="Maven: org.jetbrains:annotations:21.0.1" />
+          <element id="library" level="project" name="Maven: javax.servlet:javax.servlet-api:3.1.0" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.3" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.3" />
           <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.3" />
           <element id="library" level="project" name="Maven: teamgit.orm:teamgit_orm_p1:1.0-SNAPSHOT" />
+          <element id="library" level="project" name="Maven: com.mchange:c3p0:0.9.5.5" />
+          <element id="library" level="project" name="Maven: com.mchange:mchange-commons-java:0.2.19" />
           <element id="library" level="project" name="Maven: org.apache.maven.plugins:maven-compiler-plugin:3.8.1" />
           <element id="library" level="project" name="Maven: org.apache.maven:maven-plugin-api:3.0" />
           <element id="library" level="project" name="Maven: org.apache.maven:maven-model:3.0" />

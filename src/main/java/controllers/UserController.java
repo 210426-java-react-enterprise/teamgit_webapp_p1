@@ -4,6 +4,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.*;
 import dtos.*;
+import exceptions.*;
 import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
 import repos.*;
@@ -23,10 +24,11 @@ public class UserController {
     }
 
     //TODO implement register
-    public void register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //ObjectMapper mapper = new ObjectMapper();
+    public boolean register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+        boolean result = false;
 
         //Acquire parameters
         String firstName = req.getParameter("firstName");
@@ -38,23 +40,38 @@ public class UserController {
 
         // 2. construct an AppUser with that information
         AppUser appUser = new AppUser(username, password, email, firstName, lastName, dob);
-        UserInformation user = new UserInformation(username, password, email, firstName, lastName, dob);
-        System.out.println(user);
-
         //regex to test input validity
         //String invalidUserMessage = userService.isUserValid(user);
         // System.out.println("invalidUserMessage: " + invalidUserMessage);
 
 
 
-        //TODO might want it to return an AppUser instead of void
-        repo.create(appUser);
-        repo.insert(user);
-        //AppUser registeredUser = (AppUser) repo.select(user).get(0);
 
-        //using Jackson to map the user into a JSON
-        //writer.write(mapper.writeValueAsString(registeredUser));
-        writer.write("User was successfully registered!");
+
+        //TODO might want it to return an AppUser instead of void
+        try {
+            repo.create(appUser);
+            repo.insert(appUser);
+            ArrayList<Object> registeredUser = repo.select(appUser);
+
+            //using Jackson to map the user into a JSON
+            writer.write(mapper.writeValueAsString(registeredUser));
+
+            result = true;
+
+        }catch(ResourcePersistenceException e){
+            resp.setStatus(400);
+            writer.write("Could not create a table to hold your information!");
+        }
+        catch(ResourceDuplicationException e){
+            resp.setStatus(400);
+            writer.write("Your username or email is already taken!");
+        }catch(Exception e){
+            resp.setStatus(500);
+        }
+
+        return result;
+
 
         }
 
@@ -62,34 +79,29 @@ public class UserController {
 
     //TODO implement authenticate
     public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
+        boolean result = false;
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+        try {
+            String username = req.getParameter("username");
+            String password = req.getParameter("password");
 
-        String username = req.getParameter("username");
-        String password = req.getParameter("password");
+            AppUser user = new AppUser();
+            user.setUsername(username);
+            user.setPassword(password);
 
-        AppUser user = new AppUser();
-        user.setUsername(username);
-        user.setPassword(password);
+            ArrayList<Object> returnCredentials = repo.select(user);
+            writer.write(mapper.writeValueAsString(returnCredentials));
 
-        ArrayList<Object> returnList = repo.select(user);
-        StringBuilder authOutput = new StringBuilder();
-
-        for (Object o : returnList){//should only be size==1, but just in case later implementations change it
-            authOutput.append(o);
-            //user = (AppUser) o;//set stats for returned user, just in case this method is to evolve utilizing this
-        }
-        //if nothing returned, then authentication failed
-
-        if(authOutput.length() > 0) {
-            writer.write(authOutput.toString());
-            return true;
-        }else{
+        }catch(ResourceNotFoundException e){
+            resp.setStatus(401);
             writer.write("Authentication failed!");
-            return false;
         }
-
+        catch(Exception e){
+            resp.setStatus(500);
+        }
+        return result;
     }
 
 }
