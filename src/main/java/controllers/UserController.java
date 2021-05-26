@@ -61,14 +61,35 @@ public class UserController {
 
 
     //TODO implement authenticate
-    public void authenticate(HttpServletRequest req, HttpServletResponse resp) {
-        String username = "";
-        String password = "";
+    public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(password);
-    }
 
-    //public void isUsername
+        ArrayList<Object> returnList = repo.select(user);
+        StringBuilder authOutput = new StringBuilder();
+
+        for (Object o : returnList){//should only be size==1, but just in case later implementations change it
+            authOutput.append(o);
+            //user = (AppUser) o;//set stats for returned user, just in case this method is to evolve utilizing this
+        }
+        //if nothing returned, then authentication failed
+
+        if(authOutput.length() > 0) {
+            writer.write(authOutput.toString());
+            return true;
+        }else{
+            writer.write("Authentication failed!");
+            return false;
+        }
+
+    }
 
 }
