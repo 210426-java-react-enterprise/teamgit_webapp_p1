@@ -60,7 +60,6 @@ public class UserController {
 
 
 
-    //TODO implement authenticate
     public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         PrintWriter writer = resp.getWriter();
