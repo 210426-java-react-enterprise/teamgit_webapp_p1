@@ -39,13 +39,9 @@ public class UserService {
     }
 
     //TODO authenticate username and password
-    public boolean authenticateUserCredentials(AppUser user, Repo userRepo){
+    public boolean authenticateUserCredentials(AppUser appUser){
 
-        //AppUser currentUser = (AppUser) userRepo.findUserByUsernameAndPassword(user);
-
-        //if currentUser returns null, then return false
-        //if currentUser returns not null, then return true
-        //the currentUser can be used to add to this app's session
+        //might need another service method findUserByUsernameAndPassword()
 
         return false;
     }
@@ -55,7 +51,7 @@ public class UserService {
      * @param deposit_am
      */
     //TODO implement
-    public void verifyDeposit(double deposit_am, Repo userRepo){
+    public void verifyDeposit(double deposit_am){
 //        if (deposit_am < 0) {
 //            System.out.println("Deposit value must be positive!");
 //        } else{
@@ -70,7 +66,7 @@ public class UserService {
      */
 
     //TODO implement
-    public void verifyWithdrawal(double withdraw_am, Repo userRepo){
+    public void verifyWithdrawal(double withdraw_am){
 //        if (withdraw_am < 0 || withdraw_am > AccountRepo.fetchBalance(getId())) {
 //            System.out.println("Withdrawal value must be greater than zero and less than account balance!");
 //        } else{
