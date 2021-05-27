@@ -55,7 +55,6 @@ public class UserServiceTest {
         if(sut.isUserValid(user).equals("")){
             isEmpty = true;
         }
-        System.out.println(sut.isUserValid(user));
         assertFalse(isEmpty);
         assertEquals(expected, "Username, Password, Email, First name, Last name, Date of birth input(s) were not valid.");
 

@@ -31,16 +31,17 @@ public class UserController {
 
         try {
 
-            //Acquire parameters
-            String firstName = req.getParameter("firstName");
-            String lastName = req.getParameter("lastName");
-            String username = req.getParameter("username"); //allows access to the parameters of the body
-            String password = req.getParameter("password");
-            String email = req.getParameter("email");
-            String dob = req.getParameter("dob");
+            //Acquire user information using a DTO
+            UserInformation userInfo = mapper.readValue(req.getInputStream(), UserInformation.class);
 
-            // 2. construct an AppUser with that information
-            AppUser appUser = new AppUser(username, password, email, firstName, lastName, dob);
+            // 2. construct an AppUser with the mapped DTO
+            AppUser appUser = new AppUser(
+                    userInfo.getUsername(),
+                    userInfo.getPassword(),
+                    userInfo.getEmail(),
+                    userInfo.getFirstName(),
+                    userInfo.getLastName(),
+                    userInfo.getDob());
 
             ArrayList<Object> registeredUser = userService.verifyRegistration(appUser);
 
@@ -52,6 +53,7 @@ public class UserController {
             writer.write(e.getMessage());
         }catch(Exception e){
             resp.setStatus(500);
+            e.printStackTrace();
         }
     }
 

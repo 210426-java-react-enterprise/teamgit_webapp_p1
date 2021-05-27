@@ -54,7 +54,6 @@ public class AppUser {
     //dob should be YYYY-MM-DD format, regex
     @Constructor(name = "users")
     public AppUser(String username, String password, String email, String firstName, String lastName, String dob) {
-        System.out.println("Registering user...");
         this.id = 0;
         this.username = username;
         this.password = password;
