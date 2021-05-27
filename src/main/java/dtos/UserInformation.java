@@ -1,9 +1,6 @@
 package dtos;
 
-import annotations.*;
 
-@Entity()
-@Table(name = "users")
 public class UserInformation {
 
     private String username;
