@@ -1,15 +1,16 @@
 package controllers;
 
 import repos.*;
+import services.*;
 
 import javax.servlet.http.*;
 
 public class TransactionController {
 
-    private Repo repo;
+    private UserService userService;
 
-    public TransactionController(Repo repo) {
-        this.repo = repo;
+    public TransactionController(UserService userService) {
+        this.userService = userService;
     }
 
     //TODO implement validateDeposit
