@@ -22,6 +22,9 @@ public class Dispatcher {
             case "/teamgit-webapp-p1/auth.data":
                 userController.authenticate(req, resp);
                 break;
+            case "/teamgit-webapp-p1/delete.data":
+                userController.delete(req, resp);
+                break;
 
             case "/teamgit-webapp-p1/deposit.data":
                 transactionController.validateDeposit(req, resp);

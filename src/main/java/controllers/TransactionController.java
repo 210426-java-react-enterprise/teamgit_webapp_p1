@@ -24,7 +24,7 @@ public class TransactionController {
 
         String amount = req.getParameter("amount");
 
-        double deposit_am = stringCurrencyToDouble(amount);//TODO: use this to update balance
+        double deposit_am = stringCurrencyToDouble(amount);//TODO: use this to update/check balance
 
         String output = "Withdrew $" + deposit_am;
 
@@ -44,7 +44,7 @@ public class TransactionController {
 
         String amount = req.getParameter("amount");
 
-        double withdraw_am = stringCurrencyToDouble(amount);//TODO: use this to update balance
+        double withdraw_am = stringCurrencyToDouble(amount);//TODO: use this to update/check balance
 
         String output = "Withdrew $" + withdraw_am;
 
@@ -56,26 +56,15 @@ public class TransactionController {
     }
 
 
-    /**
-     * Converts a double into a String for USD currency conversion.
-     *
-     * @param dValue double
-     * @return same value as inputted double but in String format
-     */
+
     public String doubleToStringCurrency(double dValue){
         String sValue = NumberFormat.getCurrencyInstance(Locale.US).format(dValue);
         return sValue;
     }
 
 
-    /**
-     * Converts a String into a double for USD currency conversion.
-     *
-     * @param sValue String
-     * @return same value as inputted String but in double format.
-     */
-    public double stringCurrencyToDouble(String sValue){
 
+    public double stringCurrencyToDouble(String sValue){
         double dValue = 0;
         String noCommas = "";
 
@@ -85,9 +74,7 @@ public class TransactionController {
         dValue = Double.parseDouble(noCommas);
         dValue = Precision.round(dValue, 2);
 
-
         return dValue;
-
     }
 
 

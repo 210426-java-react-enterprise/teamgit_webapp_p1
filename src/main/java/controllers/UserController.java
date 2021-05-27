@@ -3,11 +3,13 @@ package controllers;
 
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
 import repos.*;
 import services.*;
+import utils.Logger;
 
 import javax.servlet.http.*;
 import java.io.*;
@@ -17,6 +19,7 @@ import java.util.*;
 public class UserController {
 
     private Repo repo;
+    private final Logger logger = Logger.getLogger();
 
     public UserController(Repo repo) {
         this.repo = repo;
@@ -89,6 +92,30 @@ public class UserController {
             return false;
         }
 
+    }
+
+    /*
+    Delete user based on unique value.
+     */
+    //TODO: Thomas, work on this!
+    public void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        try{
+            AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
+            logger.info("Attempting to delete user...");
+
+            repo.delete(appUser);
+
+        } catch (MismatchedInputException e){
+            logger.warn(e.getMessage());
+            resp.setStatus(400);
+        } catch(IllegalAccessException e){
+            logger.warn(e.getMessage());
+            resp.setStatus(401);
+        }
     }
 
 }
