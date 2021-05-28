@@ -109,4 +109,19 @@ public class UserServiceTest {
     }
 
 
+    @Test
+    public void test_verifyUserDeletion() throws IllegalAccessException {
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        when(mockRepo.delete(appUser)).thenReturn(1);
+        int value1 = mockRepo.delete(appUser);
+        assertTrue(value1 ==1);
+
+        //TODO: more!
+
+    }
+
+
 }

@@ -110,6 +110,10 @@ public class UserController {
 
         try{
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
+
+            logger.info("Verifying deletion permission...");
+            //TODO: add boolean method userService.verifyDeletion(appUser);
+
             logger.info("Attempting to delete user...");
 
             //AppUser appuser1 = repo.select(appUser);
@@ -124,7 +128,7 @@ public class UserController {
             resp.setStatus(400);
         } catch(IllegalAccessException e){
             logger.warn(e.getMessage());
-            writer.write("Illegal access error!");
+            writer.write("Illegal access error!  You may not be authorized to delete this account!  Deletion failed!");
             resp.setStatus(401);
         }
     }
