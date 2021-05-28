@@ -8,7 +8,7 @@ import models.AppUser;
 import models.TransactionValues;
 import models.UserAccount;
 import repos.*;
-import services.TransactionService;
+import services.UserService;
 
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class TransactionController {
 
     private UserInformation userInformation;
 
-    private TransactionService transactionService;
+    private UserService userService;
 
     public TransactionController(Repo repo) {
         this.repo = repo;
@@ -92,7 +92,7 @@ public class TransactionController {
         try {
             DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
             double deposit_am = deposit.getDeposit_am();
-            transactionService.validateDeposit(deposit_am);
+            userService.validateDeposit(deposit_am);
             //TODO adapt to JWC
             int curr_id = appUser.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
@@ -120,7 +120,7 @@ public class TransactionController {
         try {
             WithdrawDTO withdraw = mapper.readValue(req.getInputStream(), WithdrawDTO.class);
             double withdraw_am = withdraw.getWithdraw_am();
-            transactionService.validateWithdrawPos(withdraw_am);
+            userService.validateWithdrawPos(withdraw_am);
 
             //TODO adapt to JWC
             int curr_id = appUser.getId();
@@ -131,7 +131,7 @@ public class TransactionController {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             double balance = userAccount.getBalance();
 
-            transactionService.validateWithdrawBal(balance, withdraw_am);
+            userService.validateWithdrawBal(balance, withdraw_am);
 
             userAccount.setBalance(prev_bal-withdraw_am);
             repo.update(userAccount);

@@ -3,6 +3,7 @@ package servlets;
 import controllers.*;
 import dispatchers.*;
 import repos.*;
+import services.*;
 
 import javax.servlet.*;
 
@@ -23,7 +24,8 @@ public class DependencyLoaderListener implements ServletContextListener {
         }
 
         Repo repo = new Repo();
-        UserController userController = new UserController(repo);
+        UserService userService = new UserService(repo);
+        UserController userController = new UserController(userService);
         TransactionController transactionController = new TransactionController(repo);
         Dispatcher dispatcher = new Dispatcher(userController, transactionController);
 
@@ -31,9 +33,6 @@ public class DependencyLoaderListener implements ServletContextListener {
 
         ServletContext context = sce.getServletContext();
         context.addServlet("Servlet", servlet).addMapping("*.data");
-
-
-
 
     }
 
