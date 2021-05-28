@@ -50,7 +50,7 @@
                     <version>2.2</version>
                     <configuration>
                         <url>http://localhost:8080/manager/text</url>
-                        <server>LocalTomcat</server>
+                        <server>NewServer</server>
                         <path>/banking</path>
                         <update>true</update>
                     </configuration>
