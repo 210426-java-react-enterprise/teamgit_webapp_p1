@@ -95,16 +95,17 @@ public class UserServiceTest {
         when(mockRepo.select(any())).thenReturn(mockArray);
         assertTrue(sut.authenticateUserCredentials(username, password));
 
-        password = "bsPassword";
+        password = "bsPassword";//password doesn't match
         assertFalse(sut.authenticateUserCredentials(username, password));
 
-        verify(mockRepo, times(1)).select(any());
-        /*assertFalse(sut.authenticateUserCredentials(username, password));
-        username = "bsUsername";
-        password = "password123";
+        username = "bsUsername";//username doesn't match
+        password = "password123";//password matches
         assertFalse(sut.authenticateUserCredentials(username, password));
-        password = "bsPassword";
-        assertFalse(sut.authenticateUserCredentials(username, password));*/
+
+        password = "bsPassword";//neither username or password should match at this point
+        assertFalse(sut.authenticateUserCredentials(username, password));
+
+        verify(mockRepo, times(4)).select(any());
     }
 
 

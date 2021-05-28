@@ -61,7 +61,11 @@ public class UserService {
         AppUser selectResult = (AppUser) registeredUser.get(0);
 
         //would have matching password at this point
-        return selectResult.getUsername().equals(username);
+        if(selectResult.getUsername().equals(username) && selectResult.getPassword().equals(password)){
+            return true;
+        }
+
+        return false;
     }
 
     /**
