@@ -1,6 +1,7 @@
 package dispatchers;
 
 import controllers.*;
+import services.UserService;
 
 import javax.servlet.http.*;
 import java.io.*;

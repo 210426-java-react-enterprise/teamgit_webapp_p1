@@ -74,10 +74,29 @@ public class UserServiceTest {
 
     @Test
     public void test_verifyDeposit(){ }
+
+
     @Test
     public void test_verifyWithdrawal(){ }
 
 
+    @Test
+    public void test_authenticateUserCredentials(){
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        AppUser credentials = new AppUser();
+        credentials.setUsername("swekevin");
+        credentials.setPassword("password123");
+
+        mockRepo.insert(appUser);
+        assertTrue(sut.authenticateUserCredentials(credentials));
+        credentials.setPassword("bsPassword");
+        assertFalse(sut.authenticateUserCredentials(credentials));
+
+
+    }
 
 
 }

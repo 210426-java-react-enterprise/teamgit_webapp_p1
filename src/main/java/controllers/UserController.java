@@ -8,6 +8,7 @@ import dtos.*;
 import exceptions.*;
 import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
+import org.junit.Assert;
 import repos.*;
 import services.*;
 import utils.Logger;
@@ -71,24 +72,42 @@ public class UserController {
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+
+        String username = null;
+        String password;
         try {
-            String username = req.getParameter("username");
-            String password = req.getParameter("password");
+            username = req.getParameter("username");
+            password = req.getParameter("password");
+
+            if(username == null || password == null){
+                throw new NullPointerException();
+            }
 
             AppUser user = new AppUser();
             user.setUsername(username);
             user.setPassword(password);
 
+            if(userService.authenticateUserCredentials(user)){
+                result = true;
+            }
+
 //            ArrayList<Object> returnCredentials = repo.select(user);
 //            writer.write(mapper.writeValueAsString(returnCredentials));
 
-        }catch(ResourceNotFoundException e){
+        }catch(NullPointerException e){
             resp.setStatus(401);
-            writer.write("Authentication failed!");
+            writer.write("Invalid username/password entered!");
         }
         catch(Exception e){
             resp.setStatus(500);
+            writer.write("Authentication failed!");
         }
+
+        if(!result)
+            writer.write("Authentication for " + username + " failed!");
+        else
+            writer.write("Authentication for " + username + " succeeded!");
+
         return result;
     }
 
