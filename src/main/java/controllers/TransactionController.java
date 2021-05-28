@@ -1,6 +1,9 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dtos.DepositDTO;
 import dtos.UserInformation;
+import dtos.WithdrawDTO;
 import models.AppUser;
 import models.TransactionValues;
 import models.UserAccount;
@@ -79,14 +82,16 @@ public class TransactionController {
     }
 
     public void deposit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
         //Acquire parameters
-        String deposit = req.getParameter("deposit");
+
 
         try {
-            double deposit_am = Double.parseDouble(deposit);
+            DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
+            double deposit_am = deposit.getDeposit_am();
             transactionService.validateDeposit(deposit_am);
             //TODO adapt to JWC
             int curr_id = appUser.getId();
@@ -106,15 +111,15 @@ public class TransactionController {
         }
     }
     public void withdrawal(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
         //Acquire parameters
-        String withdraw = req.getParameter("withdraw");
 
         try {
-            double withdraw_am = Double.parseDouble(withdraw);
-
+            WithdrawDTO withdraw = mapper.readValue(req.getInputStream(), WithdrawDTO.class);
+            double withdraw_am = withdraw.getWithdraw_am();
             transactionService.validateWithdrawPos(withdraw_am);
 
             //TODO adapt to JWC

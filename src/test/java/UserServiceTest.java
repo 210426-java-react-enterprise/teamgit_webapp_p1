@@ -115,12 +115,15 @@ public class UserServiceTest {
 
 
     @Test
-    public void test_validateWithdrawalOverdraft(){
-        UserAccount userAccount = new UserAccount (1,1,40.00);
-        sut.validateWithdrawPos(2100000.12);
+    public void test_validateWithdrawalOverdraft() {
+        try {
+            UserAccount userAccount = new UserAccount(1, 1, 40.00);
+            sut.validateWithdrawPos(41.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e) {
+        }
+        verify(mockRepo, times(0)).select(any());
         verify(mockRepo, times(0)).update(any());
     }
-
 
 
 
