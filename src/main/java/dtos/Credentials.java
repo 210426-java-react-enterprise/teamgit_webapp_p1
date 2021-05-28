@@ -5,6 +5,7 @@ public class Credentials {
     private String username;
     private String password;
 
+
     public Credentials(){
         super();
     }
@@ -13,6 +14,7 @@ public class Credentials {
         this.username = username;
         this.password = password;
     }
+
 
     public String getUsername() {
         return username;
@@ -29,4 +31,5 @@ public class Credentials {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }
