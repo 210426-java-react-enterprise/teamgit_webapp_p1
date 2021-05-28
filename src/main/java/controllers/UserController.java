@@ -6,10 +6,9 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import exceptions.*;
-import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
-import org.junit.Assert;
 import repos.*;
+import security.*;
 import services.*;
 import utils.Logger;
 
@@ -23,10 +22,14 @@ public class UserController {
     private Repo repo;
     private final Logger logger = Logger.getLogger();
     private UserService userService;
+    private JWTService jwtService;
+    private JwtConfig jwtConfig;
 
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JWTService jwtService, JwtConfig jwtConfig) {
         this.userService = userService;
+        this.jwtService = jwtService;
+        this.jwtConfig = jwtConfig;
     }
 
 
@@ -66,7 +69,6 @@ public class UserController {
 
 
 
-    //TODO implement authenticate return void
     public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         boolean result = false;
         ObjectMapper mapper = new ObjectMapper();
@@ -79,9 +81,14 @@ public class UserController {
             String username = creds.getUsername();
             String password = creds.getPassword();
 
-            if(userService.authenticateUserCredentials(username, password)){
+            AppUser loginUser = userService.authenticateUserCredentials(username, password);
+            if(loginUser != null){
                 result = true;
             }
+
+            //Create JWT for authenticated user
+            String token = jwtService.createJwt(loginUser);
+            resp.setHeader(jwtConfig.HEADER, token);
 
         }catch(NullPointerException | ArrayIndexOutOfBoundsException e){
             resp.setStatus(401);

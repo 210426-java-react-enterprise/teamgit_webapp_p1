@@ -2,6 +2,8 @@ import models.*;
 import org.junit.*;
 import repos.*;
 import services.*;
+
+
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -93,17 +95,17 @@ public class UserServiceTest {
         mockArray.add(appUser);
 
         when(mockRepo.select(any())).thenReturn(mockArray);
-        assertTrue(sut.authenticateUserCredentials(username, password));
+        assertEquals(appUser, sut.authenticateUserCredentials(username, password));
 
         password = "bsPassword";//password doesn't match
-        assertFalse(sut.authenticateUserCredentials(username, password));
+        assertNull(sut.authenticateUserCredentials(username, password));
 
         username = "bsUsername";//username doesn't match
         password = "password123";//password matches
-        assertFalse(sut.authenticateUserCredentials(username, password));
+        assertNull(sut.authenticateUserCredentials(username, password));
 
         password = "bsPassword";//neither username or password should match at this point
-        assertFalse(sut.authenticateUserCredentials(username, password));
+        assertNull(sut.authenticateUserCredentials(username, password));
 
         verify(mockRepo, times(4)).select(any());
     }

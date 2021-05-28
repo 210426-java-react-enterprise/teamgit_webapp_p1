@@ -152,7 +152,7 @@ public class AppUser {
     }
 
     public enum Role {
-        ADMIN, DISABLED_USER, BASIC_USER;
+        ADMIN, BASIC_USER;
     }
 }
 

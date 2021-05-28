@@ -43,7 +43,7 @@ public class UserService {
 
 
 
-    public boolean authenticateUserCredentials(String username, String password){
+    public AppUser authenticateUserCredentials(String username, String password){
         if(username == null || password == null){
             throw new NullPointerException();
         }
@@ -54,18 +54,22 @@ public class UserService {
 
         ArrayList<Object> registeredUser = repo.select(appUser);
 
+
         if(registeredUser.size() < 1){
             throw new ArrayIndexOutOfBoundsException();
         }
 
         AppUser selectResult = (AppUser) registeredUser.get(0);
 
+
+
+
         //would have matching password at this point
         if(selectResult.getUsername().equals(username) && selectResult.getPassword().equals(password)){
-            return true;
+            return selectResult;
         }
 
-        return false;
+        return null;
     }
 
     /**
