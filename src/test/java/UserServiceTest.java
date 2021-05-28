@@ -86,16 +86,25 @@ public class UserServiceTest {
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09");
 
-        AppUser credentials = new AppUser();
-        credentials.setUsername("swekevin");
-        credentials.setPassword("password123");
+        String username = "swekevin";
+        String password = "password123";
 
-        mockRepo.insert(appUser);
-        assertTrue(sut.authenticateUserCredentials(credentials));
-        credentials.setPassword("bsPassword");
-        assertFalse(sut.authenticateUserCredentials(credentials));
+        ArrayList<Object> mockArray = new ArrayList<>();
+        mockArray.add(appUser);
 
+        when(mockRepo.select(any())).thenReturn(mockArray);
+        assertTrue(sut.authenticateUserCredentials(username, password));
 
+        password = "bsPassword";
+        assertFalse(sut.authenticateUserCredentials(username, password));
+
+        verify(mockRepo, times(1)).select(any());
+        /*assertFalse(sut.authenticateUserCredentials(username, password));
+        username = "bsUsername";
+        password = "password123";
+        assertFalse(sut.authenticateUserCredentials(username, password));
+        password = "bsPassword";
+        assertFalse(sut.authenticateUserCredentials(username, password));*/
     }
 
 

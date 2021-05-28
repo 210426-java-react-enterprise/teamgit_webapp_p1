@@ -73,40 +73,29 @@ public class UserController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        String username = null;
-        String password;
         try {
-            username = req.getParameter("username");
-            password = req.getParameter("password");
+            Credentials creds = mapper.readValue(req.getInputStream(), Credentials.class);
 
-            if(username == null || password == null){
-                throw new NullPointerException();
-            }
+            String username = creds.getUsername();
+            String password = creds.getPassword();
 
-            AppUser user = new AppUser();
-            user.setUsername(username);
-            user.setPassword(password);
-
-            if(userService.authenticateUserCredentials(user)){
+            if(userService.authenticateUserCredentials(username, password)){
                 result = true;
             }
 
-//            ArrayList<Object> returnCredentials = repo.select(user);
-//            writer.write(mapper.writeValueAsString(returnCredentials));
-
-        }catch(NullPointerException e){
+        }catch(NullPointerException | ArrayIndexOutOfBoundsException e){
             resp.setStatus(401);
             writer.write("Invalid username/password entered!");
-        }
-        catch(Exception e){
+        }catch(Exception e){
             resp.setStatus(500);
-            writer.write("Authentication failed!");
+            writer.write("Something went wrong!");
+            //e.printStackTrace();
         }
 
         if(!result)
-            writer.write("Authentication for " + username + " failed!");
+            writer.write("Authentication failed!");
         else
-            writer.write("Authentication for " + username + " succeeded!");
+            writer.write("Authentication succeeded!");
 
         return result;
     }
@@ -114,7 +103,6 @@ public class UserController {
     /*
     Delete user based on unique value.
      */
-    //TODO: Thomas, work on this!
     public void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
@@ -132,9 +120,11 @@ public class UserController {
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());
+            writer.write("Mismatched input error!");
             resp.setStatus(400);
         } catch(IllegalAccessException e){
             logger.warn(e.getMessage());
+            writer.write("Illegal access error!");
             resp.setStatus(401);
         }
     }

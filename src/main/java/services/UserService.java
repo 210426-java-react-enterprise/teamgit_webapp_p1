@@ -42,20 +42,26 @@ public class UserService {
     }
 
 
-    //might need another service method findUserByUsernameAndPassword()
-    public boolean authenticateUserCredentials(AppUser appUser){
-        String username = appUser.getUsername();
-        String password = appUser.getPassword();
+
+    public boolean authenticateUserCredentials(String username, String password){
+        if(username == null || password == null){
+            throw new NullPointerException();
+        }
+
+        AppUser appUser = new AppUser();
+        appUser.setUsername(username);
+        appUser.setPassword(password);
 
         ArrayList<Object> registeredUser = repo.select(appUser);
 
-        AppUser selectResult = (AppUser) registeredUser.get(0);
-
-        if(selectResult.getUsername().equals(username)){//would have matching password at this point
-            return true;
+        if(registeredUser.size() < 1){
+            throw new ArrayIndexOutOfBoundsException();
         }
 
-        return false;
+        AppUser selectResult = (AppUser) registeredUser.get(0);
+
+        //would have matching password at this point
+        return selectResult.getUsername().equals(username);
     }
 
     /**
