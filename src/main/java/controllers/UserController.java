@@ -107,6 +107,10 @@ public class UserController {
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
             logger.info("Attempting to delete user...");
 
+            //AppUser appuser1 = repo.select(appUser);
+            /*ArrayList<Object> userArray = repo.select(appUser);
+            writer.write(mapper.writeValueAsString(userArray));*/
+            //writer.write(mapper.writeValueAsString(appUser));
             repo.delete(appUser);
 
         } catch (MismatchedInputException e){
