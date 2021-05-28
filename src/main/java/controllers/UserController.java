@@ -3,12 +3,15 @@ package controllers;
 
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import exceptions.*;
 import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
+import org.junit.Assert;
 import repos.*;
 import services.*;
+import utils.Logger;
 
 import javax.servlet.http.*;
 import java.io.*;
@@ -17,7 +20,10 @@ import java.util.*;
 
 public class UserController {
 
+    private Repo repo;
+    private final Logger logger = Logger.getLogger();
     private UserService userService;
+
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -59,31 +65,68 @@ public class UserController {
 
 
 
+
     //TODO implement authenticate return void
     public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         boolean result = false;
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+
         try {
-            String username = req.getParameter("username");
-            String password = req.getParameter("password");
+            Credentials creds = mapper.readValue(req.getInputStream(), Credentials.class);
 
-            AppUser user = new AppUser();
-            user.setUsername(username);
-            user.setPassword(password);
+            String username = creds.getUsername();
+            String password = creds.getPassword();
 
-//            ArrayList<Object> returnCredentials = repo.select(user);
-//            writer.write(mapper.writeValueAsString(returnCredentials));
+            if(userService.authenticateUserCredentials(username, password)){
+                result = true;
+            }
 
-        }catch(ResourceNotFoundException e){
+        }catch(NullPointerException | ArrayIndexOutOfBoundsException e){
             resp.setStatus(401);
-            writer.write("Authentication failed!");
-        }
-        catch(Exception e){
+            writer.write("Invalid username/password entered!");
+        }catch(Exception e){
             resp.setStatus(500);
+            writer.write("Something went wrong!");
+            //e.printStackTrace();
         }
+
+        if(!result)
+            writer.write("Authentication failed!");
+        else
+            writer.write("Authentication succeeded!");
+
         return result;
+    }
+
+    /*
+    Delete user based on unique value.
+     */
+    public void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        try{
+            AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
+            logger.info("Attempting to delete user...");
+
+            //AppUser appuser1 = repo.select(appUser);
+            /*ArrayList<Object> userArray = repo.select(appUser);
+            writer.write(mapper.writeValueAsString(userArray));*/
+            //writer.write(mapper.writeValueAsString(appUser));
+            repo.delete(appUser);
+
+        } catch (MismatchedInputException e){
+            logger.warn(e.getMessage());
+            writer.write("Mismatched input error!");
+            resp.setStatus(400);
+        } catch(IllegalAccessException e){
+            logger.warn(e.getMessage());
+            writer.write("Illegal access error!");
+            resp.setStatus(401);
+        }
     }
 
 }

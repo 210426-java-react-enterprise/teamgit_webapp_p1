@@ -2,7 +2,6 @@ import models.*;
 import org.junit.*;
 import repos.*;
 import services.*;
-
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -44,6 +43,7 @@ public class UserServiceTest {
     }
 
 
+
     //Tests if the isUserValid() method in UserService working
     @Test
     public void test_IsUserValidWithInvalidCredentials() {
@@ -74,10 +74,39 @@ public class UserServiceTest {
 
     @Test
     public void test_verifyDeposit(){ }
+
+
     @Test
     public void test_verifyWithdrawal(){ }
 
 
+    @Test
+    public void test_authenticateUserCredentials(){
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        String username = "swekevin";
+        String password = "password123";
+
+        ArrayList<Object> mockArray = new ArrayList<>();
+        mockArray.add(appUser);
+
+        when(mockRepo.select(any())).thenReturn(mockArray);
+        assertTrue(sut.authenticateUserCredentials(username, password));
+
+        password = "bsPassword";//password doesn't match
+        assertFalse(sut.authenticateUserCredentials(username, password));
+
+        username = "bsUsername";//username doesn't match
+        password = "password123";//password matches
+        assertFalse(sut.authenticateUserCredentials(username, password));
+
+        password = "bsPassword";//neither username or password should match at this point
+        assertFalse(sut.authenticateUserCredentials(username, password));
+
+        verify(mockRepo, times(4)).select(any());
+    }
 
 
 }
