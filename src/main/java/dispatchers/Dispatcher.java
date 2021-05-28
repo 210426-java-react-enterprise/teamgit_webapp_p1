@@ -16,6 +16,17 @@ public class Dispatcher {
 
     public void dataDispatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         switch(req.getRequestURI()){
+            //http://localhost:8080/teamgit-webapp-p1/users.data
+            /*
+                {
+                    "username":"edwardboy9",
+                    "password":"edwardboy123",
+                    "email":"edwardboy9@edward.com",
+                    "firstName":"Edward",
+                    "lastName":"Boy",
+                    "dob":"1996-12-10"
+                 }
+             */
             case "/teamgit-webapp-p1/users.data":
                 userController.register(req, resp);
                 break;

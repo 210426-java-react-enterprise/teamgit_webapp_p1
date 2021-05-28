@@ -5,6 +5,7 @@ package controllers;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
+import exceptions.*;
 import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
 import repos.*;
@@ -20,78 +21,75 @@ public class UserController {
 
     private Repo repo;
     private final Logger logger = Logger.getLogger();
+    private UserService userService;
 
-    public UserController(Repo repo) {
-        this.repo = repo;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    //TODO implement register
+
     public void register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        //Acquire parameters
-        String firstName = req.getParameter("firstName");
-        String lastName = req.getParameter("lastName");
-        String username = req.getParameter("username"); //allows access to the parameters of the body
-        String password = req.getParameter("password");
-        String email = req.getParameter("email");
-        String dob = req.getParameter("dob");
+        try {
 
-        // 2. construct an AppUser with that information
-        AppUser appUser = new AppUser(username, password, email, firstName, lastName, dob);
-        UserInformation user = new UserInformation(username, password, email, firstName, lastName, dob);
-        System.out.println(user);
+            //Acquire user information using a DTO
+            UserInformation userInfo = mapper.readValue(req.getInputStream(), UserInformation.class);
 
-        //regex to test input validity
-        //String invalidUserMessage = userService.isUserValid(user);
-        // System.out.println("invalidUserMessage: " + invalidUserMessage);
+            // 2. construct an AppUser with the mapped DTO
+            AppUser appUser = new AppUser(
+                    userInfo.getUsername(),
+                    userInfo.getPassword(),
+                    userInfo.getEmail(),
+                    userInfo.getFirstName(),
+                    userInfo.getLastName(),
+                    userInfo.getDob());
 
+            ArrayList<Object> registeredUser = userService.verifyRegistration(appUser);
 
+            //using Jackson to map the user into a JSON
+            writer.write(mapper.writeValueAsString(registeredUser));
 
-        //TODO might want it to return an AppUser instead of void
-        repo.create(appUser);
-        repo.insert(user);
-        //AppUser registeredUser = (AppUser) repo.select(user).get(0);
-
-        //using Jackson to map the user into a JSON
-        //writer.write(mapper.writeValueAsString(registeredUser));
-        writer.write("User was successfully registered!");
-
+        }catch(ResourceInvalidException | UsernameUnavailableException | EmailUnavailableException e){
+            resp.setStatus(400);
+            writer.write(e.getMessage());
+        }catch(Exception e){
+            resp.setStatus(500);
+            e.printStackTrace();
         }
+    }
 
 
 
+
+    //TODO implement authenticate return void
     public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
+        boolean result = false;
+        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+        try {
+            String username = req.getParameter("username");
+            String password = req.getParameter("password");
 
-        String username = req.getParameter("username");
-        String password = req.getParameter("password");
+            AppUser user = new AppUser();
+            user.setUsername(username);
+            user.setPassword(password);
 
-        AppUser user = new AppUser();
-        user.setUsername(username);
-        user.setPassword(password);
+//            ArrayList<Object> returnCredentials = repo.select(user);
+//            writer.write(mapper.writeValueAsString(returnCredentials));
 
-        ArrayList<Object> returnList = repo.select(user);
-        StringBuilder authOutput = new StringBuilder();
-
-        for (Object o : returnList){//should only be size==1, but just in case later implementations change it
-            authOutput.append(o);
-            //user = (AppUser) o;//set stats for returned user, just in case this method is to evolve utilizing this
-        }
-        //if nothing returned, then authentication failed
-
-        if(authOutput.length() > 0) {
-            writer.write(authOutput.toString());
-            return true;
-        }else{
+        }catch(ResourceNotFoundException e){
+            resp.setStatus(401);
             writer.write("Authentication failed!");
-            return false;
         }
-
+        catch(Exception e){
+            resp.setStatus(500);
+        }
+        return result;
     }
 
     /*

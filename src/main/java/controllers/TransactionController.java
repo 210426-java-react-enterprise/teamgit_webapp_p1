@@ -2,6 +2,7 @@ package controllers;
 
 import org.apache.commons.math3.util.Precision;
 import repos.*;
+import services.*;
 
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -11,10 +12,10 @@ import java.util.Locale;
 
 public class TransactionController {
 
-    private Repo repo;
+    private UserService userService;
 
-    public TransactionController(Repo repo) {
-        this.repo = repo;
+    public TransactionController(UserService userService) {
+        this.userService = userService;
     }
 
     //TODO implement validateDeposit
