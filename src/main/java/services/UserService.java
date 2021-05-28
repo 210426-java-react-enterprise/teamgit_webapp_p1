@@ -46,22 +46,25 @@ public class UserService {
         return false;
     }
 
-    public void validateDeposit(double deposit_am) {
+    public boolean validateDeposit(double deposit_am) {
         if (deposit_am < 0) {
             throw new NegativeDepositException();
         }
+        return true;
     }
 
-    public void validateWithdrawPos(double withdraw_am) {
+    public boolean validateWithdrawPos(double withdraw_am) {
         if (withdraw_am < 0) {
             throw new NegativeWithdrawalException();
         }
+        return true;
     }
 
-    public void validateWithdrawBal(double balance, double withdraw_am) {
+    public boolean validateWithdrawBal(double balance, double withdraw_am) {
         if (withdraw_am > balance) {
             throw new NegativeWithdrawalException();
         }
+        return true;
     }
 
     //TODO implementation

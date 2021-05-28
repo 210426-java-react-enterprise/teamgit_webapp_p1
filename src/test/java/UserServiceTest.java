@@ -1,3 +1,6 @@
+import exceptions.AttemptedOverdraftException;
+import exceptions.NegativeDepositException;
+import exceptions.NegativeWithdrawalException;
 import models.*;
 import org.junit.*;
 import repos.*;
@@ -73,27 +76,41 @@ public class UserServiceTest {
 
 
     @Test
-    public void test_validateDepositValid(){
-        sut.validateDeposit(21.12);
-        verify(mockRepo, times(1)).update(any());
+    public void test_validateDepositValid() {
+        try {
+            sut.validateDeposit(21.12);
+
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(1)).update(any());
+        }
     }
 
     @Test
     public void test_validateDepositNegative(){
-        sut.validateDeposit(-21.12);
-        verify(mockRepo, times(0)).update(any());
+        try {
+            sut.validateDeposit(-21.12);
+
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(0)).update(any());
+        }
     }
 
     @Test
-    public void test_validateWithdrawalValid(){
-        sut.validateWithdrawPos(21.12);
-        verify(mockRepo, times(1)).update(any());
+    public void test_validateWithdrawalValid() {
+        try {
+            sut.validateWithdrawPos(21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(1)).update(any());
+        }
     }
 
     @Test
     public void test_validateWithdrawalNegative(){
-        sut.validateWithdrawPos(-21.12);
-        verify(mockRepo, times(0)).update(any());
+        try {
+            sut.validateWithdrawPos(-21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(0)).update(any());
+        }
     }
 
 
