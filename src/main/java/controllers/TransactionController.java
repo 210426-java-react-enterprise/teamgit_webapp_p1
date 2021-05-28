@@ -5,14 +5,12 @@ import models.AppUser;
 import models.TransactionValues;
 import models.UserAccount;
 import repos.*;
+import services.TransactionService;
 
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class TransactionController {
@@ -23,6 +21,8 @@ public class TransactionController {
 
     private UserInformation userInformation;
 
+    private TransactionService transactionService;
+
     public TransactionController(Repo repo) {
         this.repo = repo;
     }
@@ -30,6 +30,7 @@ public class TransactionController {
     public void balance(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+        //TODO JWT implementation
         int curr_id = appUser.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
         userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -43,6 +44,7 @@ public class TransactionController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
+        //TODO JWT implementation
         int curr_id = appUser.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
 
@@ -71,6 +73,7 @@ public class TransactionController {
                     " || Previous Balance: " + prev_bal + " || Net Change: " + change + " || Transaction type: " + type
                     + " || Post balance: " + (post_bal));
             writer.write("+====================+");
+            i++;
         }
         resp.setStatus(200);
     }
@@ -84,24 +87,19 @@ public class TransactionController {
 
         try {
             double deposit_am = Double.parseDouble(deposit);
-            if (deposit_am < 0){
-                writer.write("Please enter a valid dollar amount! Must be positive");
-                resp.setStatus(400);
-            } else {
-                //TODO adapt to JWC
-                int curr_id = appUser.getId();
-                UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
-                userAccount = (UserAccount) repo.select(userAccount).get(0);
-                int acc_num = userAccount.getAccount_num();
-                double prev_bal = userAccount.getBalance();
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                userAccount.setBalance(prev_bal + deposit_am);
-                repo.update(userAccount);
-                TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, deposit_am);
-                repo.insert(transactionValues);
-                resp.setStatus(200);
-
-            }
+            transactionService.validateDeposit(deposit_am);
+            //TODO adapt to JWC
+            int curr_id = appUser.getId();
+            UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
+            userAccount = (UserAccount) repo.select(userAccount).get(0);
+            int acc_num = userAccount.getAccount_num();
+            double prev_bal = userAccount.getBalance();
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            userAccount.setBalance(prev_bal + deposit_am);
+            repo.update(userAccount);
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, deposit_am);
+            repo.insert(transactionValues);
+            resp.setStatus(200);
         } catch (NumberFormatException e){
             writer.write("Please enter a valid dollar amount! Must be of proper format");
             resp.setStatus(400);
@@ -116,10 +114,9 @@ public class TransactionController {
 
         try {
             double withdraw_am = Double.parseDouble(withdraw);
-            if (withdraw_am < 0){
-                resp.setStatus(400);
-                writer.write("Please enter a valid dollar amount! Must be positive");
-            } else{
+
+            transactionService.validateWithdrawPos(withdraw_am);
+
             //TODO adapt to JWC
             int curr_id = appUser.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
@@ -127,18 +124,16 @@ public class TransactionController {
             double prev_bal = userAccount.getBalance();
             int acc_num = userAccount.getAccount_num();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                if (userAccount.getBalance() < withdraw_am) {
-                    resp.setStatus(400);
-                    writer.write("Please enter a valid dollar amount! Must be less thn your current balance");
-                } else {
-                    userAccount.setBalance(prev_bal-withdraw_am);
-                    repo.update(userAccount);
+            double balance = userAccount.getBalance();
 
-                    TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, (-1*withdraw_am));
-                    repo.insert(transactionValues);
-                    resp.setStatus(200);
-                }
-            }
+            transactionService.validateWithdrawBal(balance, withdraw_am);
+
+            userAccount.setBalance(prev_bal-withdraw_am);
+            repo.update(userAccount);
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, (-1*withdraw_am));
+            repo.insert(transactionValues);
+            resp.setStatus(200);
+
         } catch (NumberFormatException e){
             resp.setStatus(400);
             writer.write("Please enter a valid dollar amount! Must be of proper format");
