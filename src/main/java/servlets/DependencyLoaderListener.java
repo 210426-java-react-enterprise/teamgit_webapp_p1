@@ -2,7 +2,9 @@ package servlets;
 
 import controllers.*;
 import dispatchers.*;
+import io.jsonwebtoken.*;
 import repos.*;
+import security.*;
 import services.*;
 
 import javax.servlet.*;
@@ -24,15 +26,21 @@ public class DependencyLoaderListener implements ServletContextListener {
         }
 
         Repo repo = new Repo();
+
         UserService userService = new UserService(repo);
-        UserController userController = new UserController(userService);
-        TransactionController transactionController = new TransactionController(repo);
+        JwtConfig jwtConfig = new JwtConfig();
+        JwtService jwtService = new JwtService(jwtConfig);
+        UserController userController = new UserController(userService, jwtConfig, jwtService);
+        TransactionController transactionController = new TransactionController(userService);
         Dispatcher dispatcher = new Dispatcher(userController, transactionController);
 
         Servlet servlet = new Servlet(dispatcher);
 
         ServletContext context = sce.getServletContext();
         context.addServlet("Servlet", servlet).addMapping("*.data");
+
+
+
 
     }
 

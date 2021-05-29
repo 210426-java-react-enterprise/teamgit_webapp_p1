@@ -5,3 +5,4 @@ public class EmailUnavailableException extends RuntimeException{
         super("You already registered with the provided email!");
     }
 }
+
