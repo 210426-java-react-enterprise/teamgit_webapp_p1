@@ -27,18 +27,18 @@ public class Dispatcher {
                     "dob":"1996-12-10"
                  }
              */
-            case "/teamgit-webapp-p1/users.data":
+            case "/users.data":
                 userController.register(req, resp);
                 break;
-            case "/teamgit-webapp-p1/auth.data":
+            case "/auth.data":
                 userController.authenticate(req, resp);
                 break;
 
-            case "/teamgit-webapp-p1/deposit.data":
+            case "/deposit.data":
                 transactionController.validateDeposit(req, resp);
                 break;
 
-            case"/teamgit-webapp-p1/withdraw.data":
+            case"/withdraw.data":
                 transactionController.validateWithdrawal(req, resp);
                 break;
             default:
