@@ -20,7 +20,6 @@ import java.util.*;
 
 public class UserController {
 
-    private Repo repo;
     private final Logger logger = Logger.getLogger();
     private UserService userService;
 
@@ -112,20 +111,18 @@ public class UserController {
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
             logger.info("Attempting to delete user...");
 
+
+
             //AppUser appuser1 = repo.select(appUser);
             /*ArrayList<Object> userArray = repo.select(appUser);
             writer.write(mapper.writeValueAsString(userArray));*/
             //writer.write(mapper.writeValueAsString(appUser));
-            repo.delete(appUser);
+            //repo.delete(appUser);
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());
             writer.write("Mismatched input error!");
             resp.setStatus(400);
-        } catch(IllegalAccessException e){
-            logger.warn(e.getMessage());
-            writer.write("Illegal access error!");
-            resp.setStatus(401);
         }
     }
 
