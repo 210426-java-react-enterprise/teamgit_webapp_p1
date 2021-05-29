@@ -139,16 +139,19 @@ public class UserController {
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
 
             logger.info("Verifying deletion permission...");
-            if(userService.verifyDeletion(appUser)){
+
+            jwtService.parseToken(req);
+
+            if(userService.verifyDeletion(appUser))
                 writer.write("User data successfully deleted.");
-            }
-            writer.write("User data was NOT deleted.");
+            else
+                writer.write("User data was NOT deleted.");
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());
             writer.write("Mismatched input error!");
             resp.setStatus(400);
-        }catch(IllegalAccessException e){
+        } catch (IllegalAccessException e){
             logger.warn(e.getMessage());
             writer.write("You are not authorized to delete this!");
             resp.setStatus(401);

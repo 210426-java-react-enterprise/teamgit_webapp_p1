@@ -100,6 +100,15 @@ public class UserService {
         }
 
         if(username != null || email != null){//1 value must be unique
+
+            //search database and get the id
+            ArrayList<Object> result = repo.select(appUser);
+            AppUser temp = (AppUser) result.get(0);
+            if(temp.getId() != 0)
+                appUser.setId(temp.getId());
+            else
+                return false;
+
             //if at least 1 row was deleted, return true, else return false
             return (repo.delete(appUser) > 0);
         }
