@@ -58,7 +58,7 @@ public class JwtConfig {
     public String getPREFIX() {
         return PREFIX;
     }
-    
+
     public int getEXPIRATION() {
         return EXPIRATION;
     }
