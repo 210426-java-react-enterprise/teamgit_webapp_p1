@@ -76,7 +76,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void test_validateDepositValid() {
+    public void test_validateDepositValid() throws IllegalAccessException {
         try {
             sut.validateDeposit(21.12);
 
@@ -86,7 +86,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void test_validateDepositNegative(){
+    public void test_validateDepositNegative() throws IllegalAccessException {
         try {
             sut.validateDeposit(-21.12);
 
@@ -96,7 +96,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void test_validateWithdrawalValid() {
+    public void test_validateWithdrawalValid() throws IllegalAccessException {
         try {
             sut.validateWithdrawPos(21.12);
         } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
@@ -105,7 +105,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void test_validateWithdrawalNegative(){
+    public void test_validateWithdrawalNegative() throws IllegalAccessException {
         try {
             sut.validateWithdrawPos(-21.12);
         } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
@@ -115,7 +115,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void test_validateWithdrawalOverdraft() {
+    public void test_validateWithdrawalOverdraft() throws IllegalAccessException {
         try {
             sut.validateWithdrawBal(40.00,41.12);
         } catch (NegativeWithdrawalException | AttemptedOverdraftException e) {

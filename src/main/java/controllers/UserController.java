@@ -27,7 +27,6 @@ public class UserController {
         this.userService = userService;
         this.jwtConfig = jwtConfig;
         this.jwtService = jwtService;
-
     }
 
 

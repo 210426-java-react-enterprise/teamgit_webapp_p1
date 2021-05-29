@@ -2,12 +2,14 @@ package controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dtos.DepositDTO;
+import dtos.Principal;
 import dtos.UserInformation;
 import dtos.WithdrawDTO;
 import models.AppUser;
 import models.TransactionValues;
 import models.UserAccount;
 import repos.*;
+import security.JwtService;
 import services.UserService;
 
 import javax.servlet.http.*;
@@ -22,9 +24,13 @@ public class TransactionController {
 
     private AppUser appUser;
 
+    private Principal principal;
+
     private UserInformation userInformation;
 
     private UserService userService;
+
+    private JwtService jwtService;
 
     public TransactionController(Repo repo) {
         this.repo = repo;
@@ -33,8 +39,9 @@ public class TransactionController {
     public void balance(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
-        //TODO JWT implementation
-        int curr_id = appUser.getId();
+
+        jwtService.parseToken(req);
+        int curr_id = principal.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
         userAccount = (UserAccount) repo.select(userAccount).get(0);
         double curr_bal = userAccount.getBalance();
@@ -47,8 +54,8 @@ public class TransactionController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        //TODO JWT implementation
-        int curr_id = appUser.getId();
+        jwtService.parseToken(req);
+        int curr_id = principal.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
 
         userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -93,8 +100,9 @@ public class TransactionController {
             DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
             double deposit_am = deposit.getDeposit_am();
             userService.validateDeposit(deposit_am);
-            //TODO adapt to JWC
-            int curr_id = appUser.getId();
+
+            jwtService.parseToken(req);
+            int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
             int acc_num = userAccount.getAccount_num();
@@ -105,7 +113,7 @@ public class TransactionController {
             TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, deposit_am);
             repo.insert(transactionValues);
             resp.setStatus(200);
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException | IllegalAccessException e){
             writer.write("Please enter a valid dollar amount! Must be of proper format");
             resp.setStatus(400);
         }
@@ -122,8 +130,8 @@ public class TransactionController {
             double withdraw_am = withdraw.getWithdraw_am();
             userService.validateWithdrawPos(withdraw_am);
 
-            //TODO adapt to JWC
-            int curr_id = appUser.getId();
+            jwtService.parseToken(req);
+            int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
             double prev_bal = userAccount.getBalance();
@@ -139,7 +147,7 @@ public class TransactionController {
             repo.insert(transactionValues);
             resp.setStatus(200);
 
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException | IllegalAccessException e){
             resp.setStatus(400);
             writer.write("Please enter a valid dollar amount! Must be of proper format");
         }

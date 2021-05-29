@@ -155,5 +155,3 @@ public class AppUser {
         ADMIN, BASIC_USER;
     }
 }
-
-

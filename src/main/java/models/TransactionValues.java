@@ -5,11 +5,6 @@ import annotations.*;
 import java.sql.Timestamp;
 
 @Entity
-@Connection(
-        url = "jdbc:postgresql://project0-accounts.comfkmj3hfze.us-west-1.rds.amazonaws.com:5432/postgres?currentSchema=public",
-        username = "thomas",
-        password = "revature"
-)
 @Table(
         name = "transactions"
 )
