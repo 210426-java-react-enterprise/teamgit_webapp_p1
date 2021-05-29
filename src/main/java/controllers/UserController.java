@@ -1,7 +1,5 @@
 package controllers;
 
-
-
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
@@ -31,6 +29,12 @@ public class UserController {
     }
 
 
+    /**
+     * Registers a new user into the database.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException
+     */
     public void register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
@@ -65,10 +69,13 @@ public class UserController {
     }
 
 
-
-
-    //TODO implement authenticate return void
-    public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    /**
+     * Ensures the username and matching password is in the database.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException
+     */
+    public void authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         boolean result = false;
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
@@ -94,7 +101,6 @@ public class UserController {
             else
                 writer.write("Authentication succeeded!");
 
-
         }catch(AuthenticationException e){
             resp.setStatus(401);
             e.printStackTrace();
@@ -107,14 +113,15 @@ public class UserController {
             writer.write("Something went wrong!");
             e.printStackTrace();
         }
-
-
-
-        return result;
+        //return result;
     }
 
-    /*
-    Delete user based on unique value.
+
+    /**
+     * Deletes user data based on their username or email.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException in case input isn't valid
      */
     public void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -129,13 +136,6 @@ public class UserController {
                 writer.write("User data successfully deleted.");
             }
             writer.write("User data was NOT deleted.");
-
-
-            //AppUser appuser1 = repo.select(appUser);
-            /*ArrayList<Object> userArray = repo.select(appUser);
-            writer.write(mapper.writeValueAsString(userArray));*/
-            //writer.write(mapper.writeValueAsString(appUser));
-            //repo.delete(appUser);
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());

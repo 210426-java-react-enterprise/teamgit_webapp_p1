@@ -16,6 +16,11 @@ public class UserService {
     }
 
 
+    /**
+     * Varifies that the user can be registered, ensuring the username and email isn't already taken.
+     * @param appUser AppUser
+     * @return An ArrayList of Objects that should be AppUsers.  Should only be 1 object in the returned list.
+     */
     public ArrayList<Object> verifyRegistration(AppUser appUser){
 
         ArrayList<Object> registeredUser = null;
@@ -75,9 +80,13 @@ public class UserService {
     }
 
 
-
+    /**
+     * Verifies that user can be deleted by checking that there is a provided username or email.
+     * @param appUser AppUser which must contain a username and/or email.
+     * @return true if user data was deleted, false otherwise
+     * @throws IllegalAccessException
+     */
     public boolean verifyDeletion(AppUser appUser) throws IllegalAccessException {
-
         //fields that a regular user must have at least one of
         String username = null;
         String email = null;
