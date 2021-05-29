@@ -41,6 +41,9 @@ public class Dispatcher {
             case"/teamgit-webapp-p1/withdraw.data":
                 transactionController.validateWithdrawal(req, resp);
                 break;
+            case"/":
+                resp.setStatus(200);
+                break;
             default:
                 resp.setStatus(400);
                 resp.getWriter().println("The request uri was not recognized!");
