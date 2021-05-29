@@ -6,10 +6,8 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import exceptions.*;
-import jdk.nashorn.internal.runtime.arrays.*;
 import models.*;
-import org.junit.Assert;
-import repos.*;
+import security.*;
 import services.*;
 import utils.Logger;
 
@@ -21,11 +19,11 @@ import java.util.*;
 public class UserController {
 
     private final Logger logger = Logger.getLogger();
-    private UserService userService;
-
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
+
     }
 
 

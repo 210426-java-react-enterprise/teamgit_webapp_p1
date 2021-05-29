@@ -16,8 +16,8 @@ public class JwtConfig {
     private static String SECRET_KEY;
     //makes a day
     public static final int EXPIRATION = 24*60*60*1000;
-    private final SignatureAlgorithm sigAlg = SignatureAlgorithm.HS256;
-    private final Key signingKey;
+    private static final SignatureAlgorithm sigAlg = SignatureAlgorithm.HS256;
+    private static Key signingKey = null;
 
 
     public JwtConfig(){
@@ -42,11 +42,11 @@ public class JwtConfig {
 
 
 
-    public SignatureAlgorithm getSigAlg() {
+    public static SignatureAlgorithm getSigAlg() {
         return sigAlg;
     }
 
-    public Key getSigningKey() {
+    public static Key getSigningKey() {
         return signingKey;
     }
 }

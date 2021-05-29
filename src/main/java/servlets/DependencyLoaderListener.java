@@ -3,6 +3,7 @@ package servlets;
 import controllers.*;
 import dispatchers.*;
 import repos.*;
+import security.*;
 import services.*;
 
 import javax.servlet.*;
@@ -24,6 +25,7 @@ public class DependencyLoaderListener implements ServletContextListener {
         }
 
         Repo repo = new Repo();
+
         UserService userService = new UserService(repo);
         UserController userController = new UserController(userService);
         TransactionController transactionController = new TransactionController(userService);
