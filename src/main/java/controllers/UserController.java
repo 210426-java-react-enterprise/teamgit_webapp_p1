@@ -40,6 +40,8 @@ public class UserController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
+        String errorMessage = "Null values were inputted, and are not valid!";
+
         try {
 
             //Acquire user information using a DTO
@@ -54,6 +56,8 @@ public class UserController {
                     userInfo.getLastName(),
                     userInfo.getDob());
 
+            userService.isUserValid(appUser);
+
             ArrayList<Object> registeredUser = userService.verifyRegistration(appUser);
 
             //using Jackson to map the user into a JSON
@@ -62,7 +66,10 @@ public class UserController {
         }catch(ResourceInvalidException | UsernameUnavailableException | EmailUnavailableException e){
             resp.setStatus(400);
             writer.write(e.getMessage());
-        }catch(Exception e){
+        }catch(NullPointerException e){
+            resp.setStatus(400);
+            writer.write(errorMessage);
+        }catch (Exception e){
             resp.setStatus(500);
             e.printStackTrace();
         }

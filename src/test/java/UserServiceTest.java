@@ -56,8 +56,17 @@ public class UserServiceTest {
             isEmpty = true;
         }
         assertFalse(isEmpty);
-        assertEquals(expected, "Username, Password, Email, First name, Last name, Date of birth input(s) were not valid.");
 
+        final AppUser user2 = new AppUser();
+        assertThrows(NullPointerException.class, () -> sut.isUserValid(user2));
+
+        final AppUser user3 = new AppUser("starwarskid"
+                ,"pentiumAmmonium",""
+                ,"Somebody","Zero", "1999-11-01");
+        if(sut.isUserValid(user).equals("")){
+            isEmpty = true;
+        }
+        assertFalse(isEmpty);
     }
 
 
@@ -68,6 +77,7 @@ public class UserServiceTest {
         assertEquals("", sut.isUserValid(new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09")));
+
     }
 
 

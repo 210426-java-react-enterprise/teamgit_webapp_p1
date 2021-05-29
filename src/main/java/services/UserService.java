@@ -136,7 +136,6 @@ public class UserService {
 //        }
     }
 
-    //TODO implementation
 
     /**
      * Check sif username is available.
@@ -179,7 +178,7 @@ public class UserService {
      * @return a String error message, if any errors are found.
      *
      */
-    public String isUserValid(AppUser user) {
+    public String isUserValid(AppUser user) throws NullPointerException {
 
         int numcheck = 0;
 
