@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" name="teamgit_webapp_p1:war exploded">
-    <output-path>$PROJECT_DIR$/target/teamgit_webapp_p1-1.0-SNAPSHOT</output-path>
+    <output-path>$PROJECT_DIR$/target/teamgit-webapp-p1</output-path>
     <properties id="maven-jee-properties">
       <options>
         <exploded>true</exploded>
@@ -64,7 +64,7 @@
         </element>
       </element>
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/target/teamgit_webapp_p1-1.0-SNAPSHOT/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/target/teamgit-webapp-p1/META-INF/MANIFEST.MF" />
       </element>
       <element id="javaee-facet-resources" facet="teamgit_webapp_p1/web/Web" />
     </root>

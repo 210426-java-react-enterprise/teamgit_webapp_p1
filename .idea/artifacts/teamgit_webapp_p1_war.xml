@@ -7,7 +7,7 @@
         <packaging>war</packaging>
       </options>
     </properties>
-    <root id="archive" name="teamgit_webapp_p1-1.0-SNAPSHOT.war">
+    <root id="archive" name="teamgit-webapp-p1.war">
       <element id="artifact" artifact-name="teamgit_webapp_p1:war exploded" />
     </root>
   </artifact>
