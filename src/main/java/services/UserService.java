@@ -48,9 +48,9 @@ public class UserService {
      * @param password String
      * @return true if credentials match what's in database, otherwise false
      */
-    public boolean authenticateUserCredentials(String username, String password){
+    public AppUser authenticateUserCredentials(String username, String password){
         if(username == null || password == null){
-            throw new NullPointerException();
+            throw new AuthenticationException("Your username or password was invalid!");
         }
 
         AppUser appUser = new AppUser();
@@ -60,17 +60,18 @@ public class UserService {
         ArrayList<Object> registeredUser = repo.select(appUser);
 
         if(registeredUser.size() < 1){
-            throw new ArrayIndexOutOfBoundsException();
+            throw new AuthenticationFailedException("Your entered credentials do not match our records!");
         }
 
         AppUser selectResult = (AppUser) registeredUser.get(0);
 
         //would have matching password at this point
         if(selectResult.getUsername().equals(username) && selectResult.getPassword().equals(password)){
-            return true;
+            selectResult.setRole(AppUser.Role.BASIC_USER);
+            return selectResult;
         }
 
-        return false;
+        return null;
     }
 
 

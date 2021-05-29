@@ -15,38 +15,55 @@ public class JwtConfig {
     public static String PREFIX;
     private static String SECRET_KEY;
     //makes a day
-    public static final int EXPIRATION = 24*60*60*1000;
+    public final int EXPIRATION = 24*60*60*1000;
     private static final SignatureAlgorithm sigAlg = SignatureAlgorithm.HS256;
     private static Key signingKey = null;
 
 
-    public JwtConfig(){
-        byte[] secretBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
-        signingKey = new SecretKeySpec(secretBytes, sigAlg.getJcaName());
-
+    static{
         try {
             Properties props = new Properties();
             InputStream is = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream("jwt.properties");
+                                   .getContextClassLoader()
+                                   .getResourceAsStream("jwt.properties");
             props.load(is);
 
             SECRET_KEY = props.getProperty("SECRET_KEY");
             HEADER = props.getProperty("JWT_HEADER");
             PREFIX = props.getProperty("JWT_PREFIX");
 
+            byte[] secretBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
+            signingKey = new SecretKeySpec(secretBytes, sigAlg.getJcaName());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    public JwtConfig(){
 
+    }
 
-
-    public static SignatureAlgorithm getSigAlg() {
+    public SignatureAlgorithm getSigAlg() {
         return sigAlg;
     }
 
-    public static Key getSigningKey() {
+    public Key getSigningKey() {
         return signingKey;
+    }
+
+    public String getHEADER() {
+        return HEADER;
+    }
+
+    public String getPREFIX() {
+        return PREFIX;
+    }
+
+    public String getSECRET_KEY() {
+        return SECRET_KEY;
+    }
+
+    public int getEXPIRATION() {
+        return EXPIRATION;
     }
 }

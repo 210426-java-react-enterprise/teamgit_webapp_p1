@@ -11,13 +11,15 @@ import java.util.*;
 public class JwtService {
 
 
-    public JwtService(){
+    private JwtConfig jwtConfig;
 
+    public JwtService(JwtConfig jwtConfig){
+        this.jwtConfig = jwtConfig;
     }
 
     //You need to manually take tokens, copying it with its prefix, over to the Headers of your next request
     //Type in your HEADER in the key, and then paste your key into the VALUE and it should work
-    public static String createJwt(AppUser subject){
+    public String createJwt(AppUser subject){
 
         //gets the current date of token issuance
         long nowMillis = System.currentTimeMillis();
@@ -30,26 +32,26 @@ public class JwtService {
                 .setSubject(subject.getUsername())
                 .setIssuer("teamgit")
                 .claim("role", subject.getRole().toString())  //I need an enum in the passed-in subject ROLES
-                .setExpiration(new Date(nowMillis + JwtConfig.EXPIRATION)) //sets the expiration date to 14 mins
-                .signWith(JwtConfig.getSigAlg(), JwtConfig.getSigningKey());
+                .setExpiration(new Date(nowMillis + jwtConfig.getEXPIRATION())) //sets the expiration date to 14 mins
+                .signWith(jwtConfig.getSigAlg(), jwtConfig.getSigningKey());
 
-        return JwtConfig.PREFIX + jwtBuilder.compact();
+        return jwtConfig.getPREFIX() + jwtBuilder.compact();
     }
 
-    public static void parseToken(HttpServletRequest req){
+    public void parseToken(HttpServletRequest req){
         try{
-            String header = req.getHeader(JwtConfig.HEADER);
+            String header = req.getHeader(jwtConfig.getHEADER());
 
-            if(header == null || !header.startsWith(JwtConfig.PREFIX)){
+            if(header == null || !header.startsWith(jwtConfig.PREFIX)){
                 return;
             }
 
-            String token = header.replaceAll(JwtConfig.PREFIX, "");
+            String token = header.replaceAll(jwtConfig.getPREFIX(), "");
 
             //the parser will throw certain exceptions that can potentially happen if given bad or expired JWT!
             //hover over .parseClaimsJwt()
             Claims jwtClaims = Jwts.parser()
-                    .setSigningKey(JwtConfig.getSigningKey())
+                    .setSigningKey(jwtConfig.getSigningKey())
                                    //.setSigningKey(jwsConfig.getSecret().getBytes())
                     .parseClaimsJws(token)
                     .getBody();

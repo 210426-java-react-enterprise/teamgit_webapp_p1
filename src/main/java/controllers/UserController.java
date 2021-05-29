@@ -20,9 +20,13 @@ public class UserController {
 
     private final Logger logger = Logger.getLogger();
     private final UserService userService;
+    private final JwtConfig jwtConfig;
+    private final JwtService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtConfig jwtConfig, JwtService jwtService) {
         this.userService = userService;
+        this.jwtConfig = jwtConfig;
+        this.jwtService = jwtService;
 
     }
 
@@ -76,23 +80,35 @@ public class UserController {
             String username = creds.getUsername();
             String password = creds.getPassword();
 
-            if(userService.authenticateUserCredentials(username, password)){
+            AppUser authenticatedUser = userService.authenticateUserCredentials(username, password);
+
+            if(authenticatedUser != null){
                 result = true;
+                String token = jwtService.createJwt(authenticatedUser);
+                resp.setHeader(jwtConfig.getHEADER(), token);
+
             }
 
-        }catch(NullPointerException | ArrayIndexOutOfBoundsException e){
+            if(!result)
+                writer.write("Authentication failed!");
+            else
+                writer.write("Authentication succeeded!");
+
+
+        }catch(AuthenticationException e){
             resp.setStatus(401);
-            writer.write("Invalid username/password entered!");
-        }catch(Exception e){
+            e.printStackTrace();
+            writer.write(e.getMessage());
+        }catch(AuthenticationFailedException e){
+            resp.setStatus(401);
+            writer.write(e.getMessage());
+        } catch(Exception e){
             resp.setStatus(500);
             writer.write("Something went wrong!");
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
-        if(!result)
-            writer.write("Authentication failed!");
-        else
-            writer.write("Authentication succeeded!");
+
 
         return result;
     }
