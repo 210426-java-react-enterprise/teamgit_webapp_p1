@@ -21,4 +21,15 @@ public class Principal {
         this.role = AppUser.Role.valueOf(jwtClaims.get("role", String.class));
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public AppUser.Role getRole() {
+        return role;
+    }
 }

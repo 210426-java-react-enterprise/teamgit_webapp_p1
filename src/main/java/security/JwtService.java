@@ -8,11 +8,12 @@ import models.*;
 import javax.servlet.http.*;
 import java.util.*;
 
-public class JWTService {
+public class JwtService {
+
 
     private JwtConfig jwtConfig;
 
-    public JWTService(JwtConfig jwtConfig){
+    public JwtService(JwtConfig jwtConfig){
         this.jwtConfig = jwtConfig;
     }
 
@@ -31,21 +32,21 @@ public class JWTService {
                 .setSubject(subject.getUsername())
                 .setIssuer("teamgit")
                 .claim("role", subject.getRole().toString())  //I need an enum in the passed-in subject ROLES
-                .setExpiration(new Date(nowMillis + JwtConfig.EXPIRATION)) //sets the expiration date to 14 mins
+                .setExpiration(new Date(nowMillis + jwtConfig.getEXPIRATION())) //sets the expiration date to 14 mins
                 .signWith(jwtConfig.getSigAlg(), jwtConfig.getSigningKey());
 
-        return JwtConfig.PREFIX + jwtBuilder.compact();
+        return jwtConfig.getPREFIX() + jwtBuilder.compact();
     }
 
     public void parseToken(HttpServletRequest req){
         try{
-            String header = req.getHeader(JwtConfig.HEADER);
+            String header = req.getHeader(jwtConfig.getHEADER());
 
-            if(header == null || !header.startsWith(JwtConfig.PREFIX)){
+            if(header == null || !header.startsWith(jwtConfig.PREFIX)){
                 return;
             }
 
-            String token = header.replaceAll(JwtConfig.PREFIX, "");
+            String token = header.replaceAll(jwtConfig.getPREFIX(), "");
 
             //the parser will throw certain exceptions that can potentially happen if given bad or expired JWT!
             //hover over .parseClaimsJwt()
