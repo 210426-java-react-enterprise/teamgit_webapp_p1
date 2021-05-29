@@ -151,7 +151,7 @@ public class UserController {
             logger.warn(e.getMessage());
             writer.write("Mismatched input error!");
             resp.setStatus(400);
-        } catch (IllegalAccessException e){
+        } catch (IllegalAccessException | IllegalArgumentException e){
             logger.warn(e.getMessage());
             writer.write("You are not authorized to delete this!");
             resp.setStatus(401);
