@@ -109,4 +109,37 @@ public class UserServiceTest {
     }
 
 
+    @Test
+    public void test_verifyUserDeletion() throws IllegalAccessException {
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        when(mockRepo.delete(appUser)).thenReturn(1);
+        boolean value1 = sut.verifyDeletion(appUser);//delete from database
+        assertTrue(value1);
+
+        when(mockRepo.delete(any())).thenReturn(0);
+
+        AppUser appUser2 = new AppUser();
+        value1 = sut.verifyDeletion(appUser2);//won't run delete for null
+        assertFalse(value1);
+
+        appUser2.setUsername("tester");
+        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete anything
+        assertFalse(value1);
+
+        appUser2.setUsername(null);
+        appUser2.setEmail("test@revature.net");
+        value1 = sut.verifyDeletion(appUser2);//same as above
+        assertFalse(value1);
+
+        appUser2.setUsername("tester");
+        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete as it's not in database
+        assertFalse(value1);
+
+        verify(mockRepo, times(4)).delete(any());
+    }
+
+
 }
