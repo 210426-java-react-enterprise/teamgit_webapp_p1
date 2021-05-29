@@ -42,7 +42,12 @@ public class UserService {
     }
 
 
-
+    /**
+     * Checks username and password in the database and verifies that they are both in the same row (i.e. they match).
+     * @param username String
+     * @param password String
+     * @return true if credentials match what's in database, otherwise false
+     */
     public boolean authenticateUserCredentials(String username, String password){
         if(username == null || password == null){
             throw new NullPointerException();
@@ -68,11 +73,37 @@ public class UserService {
         return false;
     }
 
+
+
+    public boolean verifyDeletion(AppUser appUser) throws IllegalAccessException {
+
+        //fields that a regular user must have at least one of
+        String username = null;
+        String email = null;
+
+        if(appUser.getUsername() != null){
+            username = appUser.getUsername();
+        }
+
+        if(appUser.getEmail() != null){
+            email = appUser.getEmail();
+        }
+
+        if(username != null || email != null){//1 value must be unique
+            //if at least 1 row was deleted, return true, else return false
+            return (repo.delete(appUser) > 0);
+        }
+
+        return false;
+    }
+
+
+
     /**
      * verifies that the deposit is positive, if it is it will invoke the deposit
      * @param deposit_am
      */
-    //TODO: Thomas, finish this!
+    //TODO: needs implementation
     public void verifyDeposit(double deposit_am){
 //        if (deposit_am < 0) {
 //            System.out.println("Deposit value must be positive!");

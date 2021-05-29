@@ -109,6 +109,10 @@ public class UserController {
 
         try{
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
+
+            logger.info("Verifying deletion permission...");
+            //TODO: add boolean method userService.verifyDeletion(appUser);
+
             logger.info("Attempting to delete user...");
 
 
