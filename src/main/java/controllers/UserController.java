@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import exceptions.*;
+import io.jsonwebtoken.Claims;
 import models.*;
 import security.*;
 import services.*;
@@ -140,20 +141,33 @@ public class UserController {
 
             logger.info("Verifying deletion permission...");
 
-            jwtService.parseToken(req);
+            if(userService.verifyDeletion(appUser)) {//if user can be deleted, will set user's id from database
+                jwtService.parseToken(req);
+                //Claims jwtAttribute = (Claims) req.getUserPrincipal();
+                Principal principal = (Principal) req.getAttribute("principal");
+                int userId = principal.getId();
+                String username = principal.getUsername();
+                AppUser.Role role = principal.getRole();
 
-            if(userService.verifyDeletion(appUser))
+                //for now, won't specify BASIC_USER until it's implemented for certain
+                if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
+                    if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
+                        throw new IllegalAccessException();
+                    }
+                }
+
+                userService.doDeletion(appUser);//do deletion
                 writer.write("User data successfully deleted.");
-            else
-                writer.write("User data was NOT deleted.");
+
+            }
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());
-            writer.write("Mismatched input error!");
+            writer.write("Mismatched input error!  User data not deleted!");
             resp.setStatus(400);
         } catch (IllegalAccessException | IllegalArgumentException e){
             logger.warn(e.getMessage());
-            writer.write("You are not authorized to delete this!");
+            writer.write("You are not authorized to delete this!  User data not deleted!");
             resp.setStatus(401);
         }
     }

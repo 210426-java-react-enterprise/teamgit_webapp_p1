@@ -81,12 +81,11 @@ public class UserService {
 
 
     /**
-     * Verifies that user can be deleted by checking that there is a provided username or email.
+     * Verifies that user can be deleted by checking that there is a provided username or email.  Will set userID if found in database.
      * @param appUser AppUser which must contain a username and/or email.
-     * @return true if user data was deleted, false otherwise
-     * @throws IllegalAccessException
+     * @return true if user data was found and ID set, false otherwise
      */
-    public boolean verifyDeletion(AppUser appUser) throws IllegalAccessException {
+    public boolean verifyDeletion(AppUser appUser) {
         //fields that a regular user must have at least one of
         String username = null;
         String email = null;
@@ -104,16 +103,25 @@ public class UserService {
             //search database and get the id
             ArrayList<Object> result = repo.select(appUser);
             AppUser temp = (AppUser) result.get(0);
-            if(temp.getId() != 0)
+            
+            if(temp.getId() != 0) {
                 appUser.setId(temp.getId());
+                return true;
+            }
             else
                 return false;
 
             //if at least 1 row was deleted, return true, else return false
-            return (repo.delete(appUser) > 0);
+            //return (repo.delete(appUser) > 0);
         }
 
         return false;
+    }
+
+
+
+    public void doDeletion(AppUser appUser) throws IllegalAccessException {
+        repo.delete(appUser);
     }
 
 
