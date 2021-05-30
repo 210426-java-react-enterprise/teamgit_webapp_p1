@@ -1,5 +1,6 @@
 package security;
 
+
 import io.jsonwebtoken.*;
 
 import javax.crypto.spec.*;
@@ -62,4 +63,5 @@ public class JwtConfig {
     public int getEXPIRATION() {
         return EXPIRATION;
     }
+
 }
