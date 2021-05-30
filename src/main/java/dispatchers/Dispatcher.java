@@ -1,6 +1,7 @@
 package dispatchers;
 
 import controllers.*;
+import services.UserService;
 
 import javax.servlet.http.*;
 import java.io.*;
@@ -27,17 +28,23 @@ public class Dispatcher {
                     "dob":"1996-12-10"
                  }
              */
+            case "/users.data":
             case "/teamgit-webapp-p1/users.data":
                 userController.register(req, resp);
                 break;
+            case "/auth.data":
             case "/teamgit-webapp-p1/auth.data":
                 userController.authenticate(req, resp);
                 break;
-
+            case "/delete.data":
+            case "/teamgit-webapp-p1/delete.data":
+                userController.delete(req, resp);
+                break;
+            case "/deposit.data":
             case "/teamgit-webapp-p1/deposit.data":
                 transactionController.validateDeposit(req, resp);
                 break;
-
+            case"/withdraw.data":
             case"/teamgit-webapp-p1/withdraw.data":
                 transactionController.validateWithdrawal(req, resp);
                 break;

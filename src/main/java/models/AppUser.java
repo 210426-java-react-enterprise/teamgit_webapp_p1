@@ -41,6 +41,8 @@ public class AppUser {
     @Column(name = "dob", nullable = false, unique = false, type = "date", updateable = false)
     private String dob;
 
+    private Role role;
+
     @Constructor(name = "users", type = "noargs")
     public AppUser(){
         this.id = 0;
@@ -140,5 +142,18 @@ public class AppUser {
                 ", dob='" + dob + '\'' +
                 '}';
     }
+
+    public Role getRole(){
+        return role;
+    }
+
+    public void setRole(Role role){
+        this.role = role;
+    }
+
+    public enum Role {
+        ADMIN, BASIC_USER;
+    }
 }
+
 

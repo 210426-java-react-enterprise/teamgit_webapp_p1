@@ -2,7 +2,6 @@ import models.*;
 import org.junit.*;
 import repos.*;
 import services.*;
-
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -44,6 +43,7 @@ public class UserServiceTest {
     }
 
 
+
     //Tests if the isUserValid() method in UserService working
     @Test
     public void test_IsUserValidWithInvalidCredentials() {
@@ -74,10 +74,71 @@ public class UserServiceTest {
 
     @Test
     public void test_verifyDeposit(){ }
+
+
     @Test
     public void test_verifyWithdrawal(){ }
 
 
+    @Test
+    public void test_authenticateUserCredentials(){
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        String username = "swekevin";
+        String password = "password123";
+
+        ArrayList<Object> mockArray = new ArrayList<>();
+        mockArray.add(appUser);
+
+        when(mockRepo.select(any())).thenReturn(mockArray);
+        assertEquals(appUser, sut.authenticateUserCredentials(username, password));
+
+        password = "bsPassword";//password doesn't match
+        assertNull(sut.authenticateUserCredentials(username, password));
+
+        username = "bsUsername";//username doesn't match
+        password = "password123";//password matches
+        assertNull(sut.authenticateUserCredentials(username, password));
+
+        password = "bsPassword";//neither username or password should match at this point
+        assertNull(sut.authenticateUserCredentials(username, password));
+        verify(mockRepo, times(4)).select(any());
+    }
+
+
+    @Test
+    public void test_verifyUserDeletion() throws IllegalAccessException {
+        AppUser appUser = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+
+        when(mockRepo.delete(appUser)).thenReturn(1);
+        boolean value1 = sut.verifyDeletion(appUser);//delete from database
+        assertTrue(value1);
+
+        when(mockRepo.delete(any())).thenReturn(0);
+
+        AppUser appUser2 = new AppUser();
+        value1 = sut.verifyDeletion(appUser2);//won't run delete for null
+        assertFalse(value1);
+
+        appUser2.setUsername("tester");
+        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete anything
+        assertFalse(value1);
+
+        appUser2.setUsername(null);
+        appUser2.setEmail("test@revature.net");
+        value1 = sut.verifyDeletion(appUser2);//same as above
+        assertFalse(value1);
+
+        appUser2.setUsername("tester");
+        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete as it's not in database
+        assertFalse(value1);
+
+        verify(mockRepo, times(4)).delete(any());
+    }
 
 
 }
