@@ -48,9 +48,11 @@ public class TransactionController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
+
         //AppUser.Role role = principal.getRole(); //TODO If you need it here is how you access the role
 
         int curr_id = fetchId(req);
+
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
         userAccount = (UserAccount) repo.select(userAccount).get(0);
         double curr_bal = userAccount.getBalance();
@@ -62,6 +64,7 @@ public class TransactionController {
     public void transactions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+
 
         int curr_id = fetchId(req);
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
