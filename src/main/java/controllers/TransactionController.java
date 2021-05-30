@@ -25,31 +25,32 @@ import java.util.*;
 
 public class TransactionController {
 
-    private Repo repo;
-    private AppUser appUser;
-    private Principal principal;
-    private UserInformation userInformation;
-
     private final Logger logger = Logger.getLogger();
-    private UserService userService = new UserService(repo);
-    private JwtConfig jwtConfig;
-    private JwtService jwtService = new JwtService();
+    private Repo repo;
+    private UserService userService;
+    private JwtService jwtService;
 
-    public TransactionController(Principal principal, JwtConfig jwtConfig, JwtService jwtService) {
-        this.jwtConfig = jwtConfig;
-        this.principal = principal;
+    public TransactionController(Repo repo, UserService userService, JwtService jwtService) {
+        this.repo = repo;
+        this.userService = userService;
+        this.jwtService = jwtService;
+
     }
 
-    public TransactionController(Repo repo) {
-        this.repo = repo;
+    public int fetchId (HttpServletRequest req) {
+        jwtService.parseToken(req);
+        Principal principal = (Principal) req.getAttribute("principal");
+
+        return principal.getId();
     }
 
     public void balance(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        jwtService.parseToken(req);
-        int curr_id = principal.getId();
+        //AppUser.Role role = principal.getRole(); //TODO If you need it here is how you access the role
+
+        int curr_id = fetchId(req);
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
         userAccount = (UserAccount) repo.select(userAccount).get(0);
         double curr_bal = userAccount.getBalance();
@@ -62,8 +63,7 @@ public class TransactionController {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        jwtService.parseToken(req);
-        int curr_id = principal.getId();
+        int curr_id = fetchId(req);
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
 
         userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -89,7 +89,7 @@ public class TransactionController {
             String type = change > 0 ? "DEPOSIT" : "WITHDRAW";
             writer.write("|| Transaction Number: " + trans_num + " || Account Number: " + account_num +
                     " || Previous Balance: " + prev_bal + " || Net Change: " + change + " || Transaction type: " + type
-                    + " || Post balance: " + (post_bal));
+                    + " || Post balance: " + (post_bal) + "|| Time: " +timestamp);
             writer.write("+====================+");
             i++;
         }
@@ -104,13 +104,10 @@ public class TransactionController {
         //Acquire parameters
         try {
             DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
-            double deposit_am = Double.parseDouble(deposit.getDeposit());
+            double deposit_am = deposit.getDeposit();
             userService.validateDeposit(deposit_am);
 
-
-            jwtService.parseToken(req);
-            //TODO issue with principal!!
-            int curr_id = principal.getId();
+            int curr_id = fetchId(req);
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
             int acc_num = userAccount.getAccount_num();
@@ -139,6 +136,7 @@ public class TransactionController {
             userService.validateWithdrawPos(withdraw_am);
 
             jwtService.parseToken(req);
+            Principal principal = (Principal) req.getAttribute("principal");
             int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -161,4 +159,3 @@ public class TransactionController {
         }
     }
 }
-
