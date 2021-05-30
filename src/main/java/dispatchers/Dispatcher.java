@@ -1,6 +1,7 @@
 package dispatchers;
 
 import controllers.*;
+import services.UserService;
 
 import javax.servlet.http.*;
 import java.io.*;
@@ -33,13 +34,22 @@ public class Dispatcher {
             case "/teamgit-webapp-p1/auth.data":
                 userController.authenticate(req, resp);
                 break;
+            case "/teamgit-webapp-p1/delete.data":
+                userController.delete(req, resp);
+                break;
 
             case "/teamgit-webapp-p1/deposit.data":
-                transactionController.validateDeposit(req, resp);
+                transactionController.deposit(req, resp);
                 break;
 
             case"/teamgit-webapp-p1/withdraw.data":
-                transactionController.validateWithdrawal(req, resp);
+                transactionController.withdrawal(req, resp);
+                break;
+            case"/teamgit-webapp-p1/balance.data":
+                transactionController.balance(req, resp);
+                break;
+            case"/teamgit-webapp-p1/transactions.data":
+                transactionController.transactions(req, resp);
                 break;
             default:
                 resp.setStatus(400);
