@@ -31,7 +31,7 @@ public class DependencyLoaderListener implements ServletContextListener {
         JwtConfig jwtConfig = new JwtConfig();
         JwtService jwtService = new JwtService(jwtConfig);
         UserController userController = new UserController(userService, jwtConfig, jwtService);
-        TransactionController transactionController = new TransactionController(repo);
+        TransactionController transactionController = new TransactionController(repo, userService, jwtService);
         Dispatcher dispatcher = new Dispatcher(userController, transactionController);
 
         Servlet servlet = new Servlet(dispatcher);
