@@ -25,30 +25,28 @@ import java.util.*;
 
 public class TransactionController {
 
-    private Repo repo;
-    private AppUser appUser;
-    private Principal principal;
-    private UserInformation userInformation;
-
     private final Logger logger = Logger.getLogger();
-    private UserService userService = new UserService(repo);
-    private JwtConfig jwtConfig;
-    private JwtService jwtService = new JwtService();
+    private Repo repo;
+    private UserService userService;
+    private JwtService jwtService;
 
-    public TransactionController(Principal principal, JwtConfig jwtConfig, JwtService jwtService) {
-        this.jwtConfig = jwtConfig;
-        this.principal = principal;
-    }
-
-    public TransactionController(Repo repo) {
+    public TransactionController(Repo repo, UserService userService, JwtService jwtService) {
         this.repo = repo;
+        this.userService = userService;
+        this.jwtService = jwtService;
+
     }
+
 
     public void balance(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
         jwtService.parseToken(req);
+        Principal principal = (Principal) req.getAttribute("principal");
+
+        AppUser.Role role = principal.getRole(); //TODO If you need it here is how you access the role
+
         int curr_id = principal.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
         userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -63,6 +61,7 @@ public class TransactionController {
         resp.setContentType("application/json");
 
         jwtService.parseToken(req);
+        Principal principal = (Principal) req.getAttribute("principal");
         int curr_id = principal.getId();
         UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
 
@@ -109,7 +108,7 @@ public class TransactionController {
 
 
             jwtService.parseToken(req);
-            //TODO issue with principal!!
+            Principal principal = (Principal) req.getAttribute("principal");
             int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
@@ -139,6 +138,7 @@ public class TransactionController {
             userService.validateWithdrawPos(withdraw_am);
 
             jwtService.parseToken(req);
+            Principal principal = (Principal) req.getAttribute("principal");
             int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
