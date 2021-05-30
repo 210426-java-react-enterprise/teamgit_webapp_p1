@@ -17,6 +17,10 @@ public class JwtService {
         this.jwtConfig = jwtConfig;
     }
 
+    public JwtService() {
+
+    }
+
     //You need to manually take tokens, copying it with its prefix, over to the Headers of your next request
     //Type in your HEADER in the key, and then paste your key into the VALUE and it should work
     public String createJwt(AppUser subject){

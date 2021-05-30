@@ -2,17 +2,21 @@ package dtos;
 
 public class DepositDTO {
 
-    private double deposit_am;
+    private String deposit;
 
-    public DepositDTO(double deposit_am) {
-        this.deposit_am = deposit_am;
+    public DepositDTO(){
+        super();
     }
 
-    public double getDeposit_am() {
-        return deposit_am;
+    public DepositDTO(String deposit) {
+        this.deposit = deposit;
     }
 
-    public void setDeposit_am(double deposit_am) {
-        this.deposit_am = deposit_am;
+    public String getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(String deposit) {
+        this.deposit = deposit;
     }
 }

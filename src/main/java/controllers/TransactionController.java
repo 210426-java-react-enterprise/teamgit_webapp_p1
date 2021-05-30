@@ -5,32 +5,40 @@ import dtos.DepositDTO;
 import dtos.Principal;
 import dtos.UserInformation;
 import dtos.WithdrawDTO;
+import io.jsonwebtoken.Claims;
 import models.AppUser;
 import models.TransactionValues;
 import models.UserAccount;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import repos.*;
+import security.JwtConfig;
 import security.JwtService;
 import services.UserService;
+import utils.Logger;
 
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.*;
 
 public class TransactionController {
 
     private Repo repo;
-
     private AppUser appUser;
-
     private Principal principal;
-
     private UserInformation userInformation;
 
-    private UserService userService;
+    private final Logger logger = Logger.getLogger();
+    private UserService userService = new UserService(repo);
+    private JwtConfig jwtConfig;
+    private JwtService jwtService = new JwtService();
 
-    private JwtService jwtService;
+    public TransactionController(Principal principal, JwtConfig jwtConfig, JwtService jwtService) {
+        this.jwtConfig = jwtConfig;
+        this.principal = principal;
+    }
 
     public TransactionController(Repo repo) {
         this.repo = repo;
@@ -94,14 +102,14 @@ public class TransactionController {
         resp.setContentType("application/json");
 
         //Acquire parameters
-
-
         try {
             DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
-            double deposit_am = deposit.getDeposit_am();
+            double deposit_am = Double.parseDouble(deposit.getDeposit());
             userService.validateDeposit(deposit_am);
 
+
             jwtService.parseToken(req);
+            //TODO issue with principal!!
             int curr_id = principal.getId();
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             userAccount = (UserAccount) repo.select(userAccount).get(0);
