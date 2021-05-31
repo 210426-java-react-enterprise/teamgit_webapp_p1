@@ -124,9 +124,19 @@ public class UserServiceTest {
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09");
 
+        AppUser appUserWithId = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+        appUserWithId.setId(1);
+
         when(mockRepo.delete(appUser)).thenReturn(1);
+        ArrayList<Object> appUserList = new ArrayList<>();
+        appUserList.add(appUserWithId);
+        when(mockRepo.select(appUser)).thenReturn(appUserList);
+
         boolean value1 = sut.verifyDeletion(appUser);//delete from database
         assertTrue(value1);
+        sut.doDeletion(appUser);
 
         when(mockRepo.delete(any())).thenReturn(0);
 
@@ -135,19 +145,20 @@ public class UserServiceTest {
         assertFalse(value1);
 
         appUser2.setUsername("tester");
-        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete anything
+        appUserList.set(0, appUser2);
+        value1 = sut.verifyDeletion(appUser2);//will verify, but won't delete anything
         assertFalse(value1);
 
-        appUser2.setUsername(null);
+        /*appUser2.setUsername(null);
         appUser2.setEmail("test@revature.net");
         value1 = sut.verifyDeletion(appUser2);//same as above
         assertFalse(value1);
 
         appUser2.setUsername("tester");
         value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete as it's not in database
-        assertFalse(value1);
+        assertFalse(value1);*/
 
-        verify(mockRepo, times(4)).delete(any());
+        verify(mockRepo, times(1)).delete(any());
     }
 
 
