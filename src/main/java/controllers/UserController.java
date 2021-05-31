@@ -145,20 +145,14 @@ public class UserController {
                 jwtService.parseToken(req);
                 //Claims jwtAttribute = (Claims) req.getUserPrincipal();
                 Principal principal = (Principal) req.getAttribute("principal");
-                int userId = principal.getId();
-                String username = principal.getUsername();
-                AppUser.Role role = principal.getRole();
-
-                //for now, won't specify BASIC_USER until it's implemented for certain
-                if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
-                    if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
-                        throw new IllegalAccessException();
-                    }
+                if(userService.verifyToken(principal, appUser)) {
+                    userService.doDeletion(appUser);//do deletion
+                    writer.write("User data successfully deleted.");
+                }else{
+                    throw new IllegalAccessException();
                 }
-
-                userService.doDeletion(appUser);//do deletion
-                writer.write("User data successfully deleted.");
-
+            }else{
+                throw new IllegalAccessException();
             }
 
         } catch (MismatchedInputException e){

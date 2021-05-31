@@ -1,5 +1,6 @@
 package services;
 
+import dtos.Principal;
 import exceptions.*;
 import models.*;
 import repos.*;
@@ -121,10 +122,30 @@ public class UserService {
         return false;
     }
 
+    public boolean verifyToken(Principal principal, AppUser appUser) /*throws IllegalAccessException*/ {
+
+        int userId = principal.getId();
+        String username = principal.getUsername();
+        AppUser.Role role = principal.getRole();
+
+        //for now, won't specify BASIC_USER until it's implemented for certain
+        if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
+            try {
+                if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
+                    //throw new IllegalAccessException();
+                    return false;
+                }
+            }catch(NullPointerException e){
+                return false;
+            }
+        }
+        return true;
+    }
 
 
-    public void doDeletion(AppUser appUser) throws IllegalAccessException {
-        repo.delete(appUser);
+    public int doDeletion(AppUser appUser) throws IllegalAccessException {
+        return repo.delete(appUser);
+
     }
 
 
