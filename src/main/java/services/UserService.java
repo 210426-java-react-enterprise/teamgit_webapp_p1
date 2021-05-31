@@ -1,5 +1,6 @@
 package services;
 
+import dtos.Principal;
 import exceptions.*;
 import models.*;
 import repos.*;
@@ -16,6 +17,11 @@ public class UserService {
     }
 
 
+    /**
+     * Varifies that the user can be registered, ensuring the username and email isn't already taken.
+     * @param appUser AppUser
+     * @return An ArrayList of Objects that should be AppUsers.  Should only be 1 object in the returned list.
+     */
     public ArrayList<Object> verifyRegistration(AppUser appUser){
 
         ArrayList<Object> registeredUser = null;
@@ -75,9 +81,12 @@ public class UserService {
     }
 
 
-
-    public boolean verifyDeletion(AppUser appUser) throws IllegalAccessException {
-
+    /**
+     * Verifies that user can be deleted by checking that there is a provided username or email.  Will set userID if found in database.
+     * @param appUser AppUser which must contain a username and/or email.
+     * @return true if user data was found and ID set, false otherwise
+     */
+    public boolean verifyDeletion(AppUser appUser) {
         //fields that a regular user must have at least one of
         String username = null;
         String email = null;
@@ -90,12 +99,53 @@ public class UserService {
             email = appUser.getEmail();
         }
 
-        if(username != null || email != null){//1 value must be unique
-            //if at least 1 row was deleted, return true, else return false
-            return (repo.delete(appUser) > 0);
+        try {
+            if (username != null || email != null) {//1 value must be unique
+
+                //search database and get the id
+                ArrayList<Object> result = repo.select(appUser);
+                AppUser temp = (AppUser) result.get(0);
+
+                if (temp.getId() != 0) {
+                    appUser.setId(temp.getId());
+                    return true;
+                } else
+                    return false;
+
+                //if at least 1 row was deleted, return true, else return false
+                //return (repo.delete(appUser) > 0);
+            }
+        }catch(IndexOutOfBoundsException e){
+            return false;
         }
 
         return false;
+    }
+
+    public boolean verifyToken(Principal principal, AppUser appUser) /*throws IllegalAccessException*/ {
+
+        int userId = principal.getId();
+        String username = principal.getUsername();
+        AppUser.Role role = principal.getRole();
+
+        //for now, won't specify BASIC_USER until it's implemented for certain
+        if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
+            try {
+                if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
+                    //throw new IllegalAccessException();
+                    return false;
+                }
+            }catch(NullPointerException e){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public int doDeletion(AppUser appUser) throws IllegalAccessException {
+        return repo.delete(appUser);
+
     }
 
 
@@ -127,7 +177,6 @@ public class UserService {
 //        }
     }
 
-    //TODO implementation
 
     /**
      * Check sif username is available.
@@ -170,7 +219,7 @@ public class UserService {
      * @return a String error message, if any errors are found.
      *
      */
-    public String isUserValid(AppUser user) {
+    public String isUserValid(AppUser user) throws NullPointerException {
 
         int numcheck = 0;
 
