@@ -1,10 +1,7 @@
 package models;
 
-import annotations.Column;
-import annotations.Entity;
-import annotations.ForeignKey;
-import annotations.Id;
-import annotations.Table;
+import annotations.*;
+import com.sun.xml.internal.ws.developer.Serialization;
 
 @Entity
 @Table(
@@ -21,7 +18,7 @@ public class UserAccount {
             type = "serial",
             updateable = false
     )
-    private static int account_num;
+    private int account_num;
     @ForeignKey(
             name = "user_id",
             references = "users"
@@ -33,7 +30,7 @@ public class UserAccount {
             type = "int",
             updateable = false
     )
-    private static int id;
+    private int id;
     @Column(
             name = "balance",
             nullable = false,
@@ -44,33 +41,48 @@ public class UserAccount {
     )
     private double balance;
 
-    public static int getAccount_num() {
+    public UserAccount(){
+
+    }
+
+    @Getter
+    public int getAccount_num() {
         return account_num;
     }
 
-    public static void setAccount_num(int account_num) {
-        models.UserAccount.account_num = account_num;
+    @Setter(
+            name = "account_num"
+    )
+    public void setAccount_num(int account_num) {
+        this.account_num = account_num;
     }
 
-    public static int getId() {
+    @Getter
+    public int getId() {
         return id;
     }
 
-    public static void setId(int id) {
-        models.UserAccount.id = id;
+    @Setter(
+            name = "id"
+    )
+    public void setId(int id) {
+        this.id = id;
     }
 
+    @Getter
     public double getBalance() {
         return this.balance;
     }
 
+    @Setter(
+            name = "balance"
+    )
     public void setBalance(double balance) {
         this.balance = balance;
     }
 
     public UserAccount(int account_num,int id, double balance) {
-        System.out.println("Registering user...");
-        models.UserAccount.id = id;
+        this.id = id;
         this.balance = balance;
         this.account_num = account_num;
     }

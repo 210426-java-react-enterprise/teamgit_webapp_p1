@@ -5,6 +5,9 @@ import dtos.DepositDTO;
 import dtos.Principal;
 import dtos.UserInformation;
 import dtos.WithdrawDTO;
+import exceptions.AttemptedOverdraftException;
+import exceptions.NegativeDepositException;
+import exceptions.NegativeWithdrawalException;
 import io.jsonwebtoken.Claims;
 import models.AppUser;
 import models.TransactionValues;
@@ -40,7 +43,6 @@ public class TransactionController {
     public int fetchId (HttpServletRequest req) {
         jwtService.parseToken(req);
         Principal principal = (Principal) req.getAttribute("principal");
-
         return principal.getId();
     }
 
@@ -78,7 +80,7 @@ public class TransactionController {
         double prev_bal = 0;
 
 
-        TransactionValues transactionValues = new TransactionValues(account_num, trans_num, timestamp, change, prev_bal);
+        TransactionValues transactionValues = new TransactionValues(trans_num, account_num, prev_bal, change);
         ArrayList arrayList = repo.select(transactionValues);
         int i = 0;
         for (Object o: arrayList) {
@@ -92,7 +94,7 @@ public class TransactionController {
             String type = change > 0 ? "DEPOSIT" : "WITHDRAW";
             writer.write("|| Transaction Number: " + trans_num + " || Account Number: " + account_num +
                     " || Previous Balance: " + prev_bal + " || Net Change: " + change + " || Transaction type: " + type
-                    + " || Post balance: " + (post_bal) + "|| Time: " +timestamp);
+                    + " || Post balance: " + (post_bal) + "\n");
             writer.write("+====================+");
             i++;
         }
@@ -112,18 +114,23 @@ public class TransactionController {
 
             int curr_id = fetchId(req);
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
-            userAccount = (UserAccount) repo.select(userAccount).get(0);
-            int acc_num = userAccount.getAccount_num();
-            double prev_bal = userAccount.getBalance();
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            userAccount.setBalance(prev_bal + deposit_am);
-            repo.update(userAccount);
-            TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, deposit_am);
+            UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
+            int acc_num = selectedUserAccount.getAccount_num();
+            double prev_bal = selectedUserAccount.getBalance();
+            double updatedTotal = prev_bal + deposit_am;
+            selectedUserAccount.setBalance(updatedTotal);
+            selectedUserAccount.setId(curr_id);
+            repo.update(selectedUserAccount);
+
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, deposit_am);
             repo.insert(transactionValues);
             resp.setStatus(200);
         } catch (NumberFormatException | IllegalAccessException e){
             writer.write("Please enter a valid dollar amount! Must be of proper format");
             resp.setStatus(400);
+        } catch (NegativeDepositException e){
+            resp.setStatus(400);
+            writer.write(e.getMessage());
         }
     }
     public void withdrawal(HttpServletRequest req, HttpServletResponse resp) throws IOException{
@@ -135,30 +142,33 @@ public class TransactionController {
 
         try {
             WithdrawDTO withdraw = mapper.readValue(req.getInputStream(), WithdrawDTO.class);
-            double withdraw_am = withdraw.getWithdraw_am();
+            double withdraw_am = withdraw.getWithdraw();
             userService.validateWithdrawPos(withdraw_am);
 
-            jwtService.parseToken(req);
-            Principal principal = (Principal) req.getAttribute("principal");
-            int curr_id = principal.getId();
+
+            int curr_id = fetchId(req);
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
-            userAccount = (UserAccount) repo.select(userAccount).get(0);
-            double prev_bal = userAccount.getBalance();
-            int acc_num = userAccount.getAccount_num();
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            double balance = userAccount.getBalance();
+            UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
+            int acc_num = selectedUserAccount.getAccount_num();
+            double prev_bal = selectedUserAccount.getBalance();
 
-            userService.validateWithdrawBal(balance, withdraw_am);
+            userService.validateWithdrawBal(withdraw_am, prev_bal);
 
-            userAccount.setBalance(prev_bal-withdraw_am);
-            repo.update(userAccount);
-            TransactionValues transactionValues = new TransactionValues(0, acc_num, timestamp, prev_bal, (-1*withdraw_am));
+            double updatedTotal = prev_bal - withdraw_am;
+            selectedUserAccount.setBalance(updatedTotal);
+            selectedUserAccount.setId(curr_id);
+            repo.update(selectedUserAccount);
+
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, (-1*withdraw_am));
             repo.insert(transactionValues);
             resp.setStatus(200);
 
         } catch (NumberFormatException | IllegalAccessException e){
             resp.setStatus(400);
             writer.write("Please enter a valid dollar amount! Must be of proper format");
+        } catch (AttemptedOverdraftException | NegativeWithdrawalException e){
+            resp.setStatus(400);
+            writer.write(e.getMessage());
         }
     }
 }

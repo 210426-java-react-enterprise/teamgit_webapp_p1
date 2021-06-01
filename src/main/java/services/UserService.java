@@ -4,6 +4,7 @@ import exceptions.*;
 import models.*;
 import repos.*;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.*;
 
@@ -33,7 +34,17 @@ public class UserService {
         }
 
         repo.create(appUser);
+
+
+
+
         repo.insert(appUser);
+        AppUser insertedAppUser = (AppUser) repo.select(appUser).get(0);
+        UserAccount userAccount = new UserAccount(0, insertedAppUser.getId(), 0.00);
+        TransactionValues transactionValues = new TransactionValues(0, 0, 0.00,0.00);
+        repo.create(userAccount);
+        repo.insert(userAccount);
+        repo.create(transactionValues);
         registeredUser = repo.select(appUser);
         return registeredUser;
     }
@@ -77,9 +88,9 @@ public class UserService {
         }
     }
 
-    public void validateWithdrawBal(double balance, double withdraw_am) {
-        if (withdraw_am > balance) {
-            throw new NegativeWithdrawalException();
+    public void validateWithdrawBal(double withdraw_am, double balance) {
+        if (balance < withdraw_am) {
+            throw new AttemptedOverdraftException();
         }
     }
 

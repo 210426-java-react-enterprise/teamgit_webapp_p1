@@ -2,17 +2,21 @@ package dtos;
 
 public class WithdrawDTO {
 
-    private double withdraw_am;
+    private double withdraw;
 
-    public WithdrawDTO(double withdraw_am) {
-        this.withdraw_am = withdraw_am;
+    public WithdrawDTO(){
+        super();
     }
 
-    public double getWithdraw_am() {
-        return withdraw_am;
+    public WithdrawDTO(double withdraw) {
+        this.withdraw = withdraw;
     }
 
-    public void setWithdraw_am(double withdraw_am) {
-        this.withdraw_am = withdraw_am;
+    public double getWithdraw() {
+        return withdraw;
+    }
+
+    public void setWithdraw(double withdraw) {
+        this.withdraw = withdraw;
     }
 }
