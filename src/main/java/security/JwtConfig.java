@@ -64,5 +64,6 @@ public class JwtConfig {
     public int getEXPIRATION() {
         return EXPIRATION;
     }
+
 }
 
