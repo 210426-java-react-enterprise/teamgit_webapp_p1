@@ -1,7 +1,6 @@
 package models;
 
 import annotations.*;
-import com.sun.xml.internal.ws.developer.Serialization;
 
 @Entity
 @Table(
