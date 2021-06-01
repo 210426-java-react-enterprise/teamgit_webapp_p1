@@ -13,13 +13,14 @@ public class UserService {
 
     private Repo repo;
 
-    public UserService(Repo repo){
+    public UserService(Repo repo) {
         this.repo = repo;
     }
 
 
     /**
      * Varifies that the user can be registered, ensuring the username and email isn't already taken.
+     *
      * @param appUser AppUser
      * @return An ArrayList of Objects that should be AppUsers.  Should only be 1 object in the returned list.
      */
@@ -43,19 +44,24 @@ public class UserService {
 
         repo.create(appUser);
 
+
         repo.insert(appUser);
-        AppUser insertedAppUser = (AppUser) repo.select(appUser).get(0);
-        UserAccount userAccount = new UserAccount(0, insertedAppUser.getId(), 0.00);
-        TransactionValues transactionValues = new TransactionValues(0, 0, 0.00,0.00);
-        repo.create(userAccount);
-        repo.insert(userAccount);
-        repo.create(transactionValues);
-        registeredUser = repo.select(appUser);
+        AppUser insertedAppUser = null;
+        if(repo.select(appUser).size() > 0) {
+            insertedAppUser = (AppUser) repo.select(appUser).get(0);
+            UserAccount userAccount = new UserAccount(0, insertedAppUser.getId(), 0.00);
+            TransactionValues transactionValues = new TransactionValues(0, 0, 0.00, 0.00);
+            repo.create(userAccount);
+            repo.insert(userAccount);
+            repo.create(transactionValues);
+            registeredUser = repo.select(appUser);
+        }
+
         return registeredUser;
     }
 
-    public AppUser authenticateUserCredentials(String username, String password){
-        if(username == null || password == null){
+    public AppUser authenticateUserCredentials(String username, String password) {
+        if (username == null || password == null) {
             throw new AuthenticationException("Your username or password was invalid!");
         }
 
@@ -65,14 +71,14 @@ public class UserService {
 
         ArrayList<Object> registeredUser = repo.select(appUser);
 
-        if(registeredUser.size() < 1){
+        if (registeredUser.size() < 1) {
             throw new AuthenticationFailedException("Your entered credentials do not match our records!");
         }
 
         AppUser selectResult = (AppUser) registeredUser.get(0);
 
         //would have matching password at this point
-        if(selectResult.getUsername().equals(username) && selectResult.getPassword().equals(password)){
+        if (selectResult.getUsername().equals(username) && selectResult.getPassword().equals(password)) {
             selectResult.setRole(AppUser.Role.BASIC_USER);
             return selectResult;
         }
@@ -85,10 +91,11 @@ public class UserService {
         if (deposit_am < 0) {
             throw new NegativeDepositException();
         }
-    } 
+    }
 
     /**
      * Verifies that user can be deleted by checking that there is a provided username or email.  Will set userID if found in database.
+     *
      * @param appUser AppUser which must contain a username and/or email.
      * @return true if user data was found and ID set, false otherwise
      */
@@ -97,71 +104,73 @@ public class UserService {
         String username = null;
         String email = null;
 
-        if(appUser.getUsername() != null){
+        if (appUser.getUsername() != null) {
             username = appUser.getUsername();
         }
 
-        if(appUser.getEmail() != null){
+        if (appUser.getEmail() != null) {
             email = appUser.getEmail();
         }
+        try {
+            if (username != null || email != null) {//1 value must be unique
 
-    public void validateWithdrawPos(double withdraw_am){
-            if (withdraw_am < 0) {
-                throw new NegativeWithdrawalException();
-                try {
-                    if (username != null || email != null) {//1 value must be unique
+                //search database and get the id
+                ArrayList<Object> result = repo.select(appUser);
+                AppUser temp = (AppUser) result.get(0);
 
-                        //search database and get the id
-                        ArrayList<Object> result = repo.select(appUser);
-                        AppUser temp = (AppUser) result.get(0);
+                if (temp.getId() != 0) {
+                    appUser.setId(temp.getId());
+                    return true;
+                } else
+                    return false;
 
-                        if (temp.getId() != 0) {
-                            appUser.setId(temp.getId());
-                            return true;
-                        } else
-                            return false;
+                //if at least 1 row was deleted, return true, else return false
+                //return (repo.delete(appUser) > 0);
+            }
+        }catch(IndexOutOfBoundsException e){
+            return false;
+        }
+        return false;
+    }
 
-                        //if at least 1 row was deleted, return true, else return false
-                        //return (repo.delete(appUser) > 0);
-                    }
-                } catch (IndexOutOfBoundsException e) {
+    public void validateWithdrawPos(double withdraw_am) {
+        if (withdraw_am < 0) {
+            throw new NegativeWithdrawalException();
+        }
+    }
+
+
+    public void validateWithdrawBal(double withdraw_am, double balance) {
+        if (balance < withdraw_am) {
+            throw new AttemptedOverdraftException();
+        }
+    }
+
+    public boolean verifyToken(Principal principal, AppUser appUser) /*throws IllegalAccessException*/ {
+
+        int userId = principal.getId();
+        String username = principal.getUsername();
+        AppUser.Role role = principal.getRole();
+
+        //for now, won't specify BASIC_USER until it's implemented for certain
+        if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
+            try {
+                if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
+                    //throw new IllegalAccessException();
                     return false;
                 }
+            }catch(NullPointerException e){
+                return false;
             }
+        }
+        return true;
+    }
 
 
-            public void validateWithdrawBal ( double withdraw_am, double balance){
-                if (balance < withdraw_am) {
-                    throw new AttemptedOverdraftException();
-                }
-            }
+    public int doDeletion(AppUser appUser) throws IllegalAccessException {
+        return repo.delete(appUser);
 
-            public boolean verifyToken (Principal principal, AppUser appUser) /*throws IllegalAccessException*/
-            {
-
-                int userId = principal.getId();
-                String username = principal.getUsername();
-                AppUser.Role role = principal.getRole();
-
-                //for now, won't specify BASIC_USER until it's implemented for certain
-                if (!role.equals(AppUser.Role.ADMIN)) {//continue deletion if it is ADMIN
-                    try {
-                        if (appUser.getId() != userId || !appUser.getUsername().equals(username)) {//this is why id is needed
-                            //throw new IllegalAccessException();
-                            return false;
-                        }
-                    } catch (NullPointerException e) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-
-            public int doDeletion (AppUser appUser) throws IllegalAccessException {
-                return repo.delete(appUser);
-
-            }
+    }
 
 
 

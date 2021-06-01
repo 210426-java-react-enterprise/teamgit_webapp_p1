@@ -1,7 +1,5 @@
 
-import exceptions.AttemptedOverdraftException;
-import exceptions.NegativeDepositException;
-import exceptions.NegativeWithdrawalException;
+import exceptions.*;
 import dtos.Principal;
 import models.*;
 import org.junit.*;
@@ -39,6 +37,7 @@ public class UserServiceTest {
         when(mockRepo.select(any())).thenReturn(new ArrayList<Object>());
 
 
+
         AppUser user = new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09");
@@ -51,6 +50,32 @@ public class UserServiceTest {
 
     }
 
+    @Test
+    public void test_AuthenticateUserCorrectCredentials(){
+        ArrayList<Object> arr = new ArrayList<>();
+        AppUser user = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+        user.setRole(AppUser.Role.BASIC_USER);
+
+        arr.add(user);
+        when(mockRepo.select(any())).thenReturn(arr);
+
+
+        assertEquals(user, sut.authenticateUserCredentials("swekevin", "password123"));
+    }
+
+    @Test(expected = AuthenticationFailedException.class)
+    public void test_AuthenticateUserWrongCredentials(){
+        when(mockRepo.select(any())).thenReturn(new ArrayList<Object>(1));
+
+        sut.authenticateUserCredentials("123", "123");
+    }
+
+    @Test(expected = AuthenticationException.class)
+    public void test_AuthenticateUserNullCredentials(){
+        sut.authenticateUserCredentials(null, null);
+    }
 
     //Tests if the isUserValid() method in UserService working
     @Test
@@ -132,12 +157,14 @@ public class UserServiceTest {
     @Test
     public void test_validateWithdrawalOverdraft() throws IllegalAccessException {
         try {
-            sut.validateWithdrawBal(40.00,41.12);
+            sut.validateWithdrawBal(40.00, 41.12);
         } catch (NegativeWithdrawalException | AttemptedOverdraftException e) {
             verify(mockRepo, times(0)).update(any());
         }
         verify(mockRepo, times(0)).update(any());
-      
+    }
+
+    @Test
     public void test_verifyUserDeletion() throws IllegalAccessException {
         AppUser appUser = new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
