@@ -48,9 +48,11 @@ public class Dispatcher {
             case"/teamgit-webapp-p1/withdraw.data":
                 transactionController.withdrawal(req, resp);
                 break;
+            case"/balance.data":
             case"/teamgit-webapp-p1/balance.data":
                 transactionController.balance(req, resp);
                 break;
+            case"/transactions.data":
             case"/teamgit-webapp-p1/transactions.data":
                 transactionController.transactions(req, resp);
                 break;
