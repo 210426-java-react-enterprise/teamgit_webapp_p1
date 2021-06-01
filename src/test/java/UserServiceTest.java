@@ -1,7 +1,13 @@
+
+import exceptions.AttemptedOverdraftException;
+import exceptions.NegativeDepositException;
+import exceptions.NegativeWithdrawalException;
+import dtos.Principal;
 import models.*;
 import org.junit.*;
 import repos.*;
 import services.*;
+
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -11,11 +17,13 @@ public class UserServiceTest {
 
     private UserService sut;
     private Repo mockRepo;
+    private Principal mockPrincipal;
 
     @Before
     public void setUp(){
         mockRepo = mock(Repo.class);
         sut = new UserService(mockRepo);
+        mockPrincipal = mock(Principal.class);
     }
 
     @After
@@ -23,6 +31,7 @@ public class UserServiceTest {
         //tear down every mock or sut after each test run
         sut = null;
         mockRepo = null;
+        mockPrincipal = null;
     }
 
     @Test
@@ -43,7 +52,6 @@ public class UserServiceTest {
     }
 
 
-
     //Tests if the isUserValid() method in UserService working
     @Test
     public void test_IsUserValidWithInvalidCredentials() {
@@ -56,8 +64,17 @@ public class UserServiceTest {
             isEmpty = true;
         }
         assertFalse(isEmpty);
-        assertEquals(expected, "Username, Password, Email, First name, Last name, Date of birth input(s) were not valid.");
 
+        final AppUser user2 = new AppUser();
+        assertThrows(NullPointerException.class, () -> sut.isUserValid(user2));
+
+        final AppUser user3 = new AppUser("starwarskid"
+                ,"pentiumAmmonium",""
+                ,"Somebody","Zero", "1999-11-01");
+        if(sut.isUserValid(user).equals("")){
+            isEmpty = true;
+        }
+        assertFalse(isEmpty);
     }
 
 
@@ -68,77 +85,106 @@ public class UserServiceTest {
         assertEquals("", sut.isUserValid(new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09")));
+
     }
 
 
 
     @Test
-    public void test_verifyDeposit(){ }
+    public void test_validateDepositValid() throws IllegalAccessException {
+        try {
+            sut.validateDeposit(21.12);
 
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(1)).update(any());
+        }
+    }
 
     @Test
-    public void test_verifyWithdrawal(){ }
+    public void test_validateDepositNegative() throws IllegalAccessException {
+        try {
+            sut.validateDeposit(-21.12);
 
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(0)).update(any());
+        }
+    }
 
     @Test
-    public void test_authenticateUserCredentials(){
-        AppUser appUser = new AppUser("swekevin"
-                ,"password123","kevin@revature.net"
-                ,"Kevin","Chang", "1999-11-09");
+    public void test_validateWithdrawalValid() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawPos(21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(1)).update(any());
+        }
+    }
 
-        String username = "swekevin";
-        String password = "password123";
-
-        ArrayList<Object> mockArray = new ArrayList<>();
-        mockArray.add(appUser);
-
-        when(mockRepo.select(any())).thenReturn(mockArray);
-        assertEquals(appUser, sut.authenticateUserCredentials(username, password));
-
-        password = "bsPassword";//password doesn't match
-        assertNull(sut.authenticateUserCredentials(username, password));
-
-        username = "bsUsername";//username doesn't match
-        password = "password123";//password matches
-        assertNull(sut.authenticateUserCredentials(username, password));
-
-        password = "bsPassword";//neither username or password should match at this point
-        assertNull(sut.authenticateUserCredentials(username, password));
-        verify(mockRepo, times(4)).select(any());
+    @Test
+    public void test_validateWithdrawalNegative() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawPos(-21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(0)).update(any());
+        }
     }
 
 
     @Test
+    public void test_validateWithdrawalOverdraft() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawBal(40.00,41.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e) {
+            verify(mockRepo, times(0)).update(any());
+        }
+        verify(mockRepo, times(0)).update(any());
+      
     public void test_verifyUserDeletion() throws IllegalAccessException {
         AppUser appUser = new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
                 ,"Kevin","Chang", "1999-11-09");
 
-        when(mockRepo.delete(appUser)).thenReturn(1);
-        boolean value1 = sut.verifyDeletion(appUser);//delete from database
-        assertTrue(value1);
+        AppUser appUserWithId = new AppUser("swekevin"
+                ,"password123","kevin@revature.net"
+                ,"Kevin","Chang", "1999-11-09");
+        appUserWithId.setId(1);
 
-        when(mockRepo.delete(any())).thenReturn(0);
+        when(mockPrincipal.getId()).thenReturn(1);
+        when(mockPrincipal.getUsername()).thenReturn(appUser.getUsername());
+        AppUser.Role role = AppUser.Role.BASIC_USER;
+        when(mockPrincipal.getRole()).thenReturn(role);
 
-        AppUser appUser2 = new AppUser();
-        value1 = sut.verifyDeletion(appUser2);//won't run delete for null
-        assertFalse(value1);
 
-        appUser2.setUsername("tester");
-        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete anything
-        assertFalse(value1);
+        //TEST SUCCESSFUL VALIDATION AND DELETION OF 1 USER FROM DATABASE
+        when(mockRepo.delete(appUser)).thenReturn(1);//0 means nothing deleted, > 0 means something was deleted
+        ArrayList<Object> appUserList = new ArrayList<>();
+        appUserList.add(appUserWithId);
+        when(mockRepo.select(appUser)).thenReturn(appUserList);
+        boolean userVerified = sut.verifyDeletion(appUser);//verify that user is in database and can be deleted
+        assertTrue(userVerified);
+        boolean tokenVerified = sut.verifyToken(mockPrincipal, appUser);
+        assertTrue(tokenVerified);
+        int rowsDeleted = sut.doDeletion(appUser);
+        assertEquals(1, rowsDeleted);
 
-        appUser2.setUsername(null);
-        appUser2.setEmail("test@revature.net");
-        value1 = sut.verifyDeletion(appUser2);//same as above
-        assertFalse(value1);
 
-        appUser2.setUsername("tester");
-        value1 = sut.verifyDeletion(appUser2);//will run delete, but won't delete as it's not in database
-        assertFalse(value1);
+        //TEST UNSUCCESSFUL USER VALIDATION
+        when(mockRepo.delete(appUser)).thenReturn(0);//nothing would be deleted
+        appUser.setUsername(null);
+        appUser.setEmail(null);
+        appUser.setId(0);//invalid Id
+        appUserList.set(0, appUser);//update what is returned from select
+        userVerified = sut.verifyDeletion(appUser);
+        assertFalse(userVerified);
 
-        verify(mockRepo, times(4)).delete(any());
+        
+        //TEST UNSUCCESSFUL TOKEN VALIDATION
+        when(mockPrincipal.getId()).thenReturn(0);
+        tokenVerified = sut.verifyToken(mockPrincipal, appUser);
+        assertFalse(tokenVerified);
+
+        verify(mockRepo, times(1)).delete(any());//make sure delete was only ran once
     }
+
 
 
 }

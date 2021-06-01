@@ -1,82 +1,174 @@
 package controllers;
 
-import org.apache.commons.math3.util.Precision;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dtos.DepositDTO;
+import dtos.Principal;
+import dtos.UserInformation;
+import dtos.WithdrawDTO;
+import exceptions.AttemptedOverdraftException;
+import exceptions.NegativeDepositException;
+import exceptions.NegativeWithdrawalException;
+import io.jsonwebtoken.Claims;
+import models.AppUser;
+import models.TransactionValues;
+import models.UserAccount;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import repos.*;
-import services.*;
+import security.JwtConfig;
+import security.JwtService;
+import services.UserService;
+import utils.Logger;
 
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class TransactionController {
 
+    private final Logger logger = Logger.getLogger();
+    private Repo repo;
     private UserService userService;
+    private JwtService jwtService;
 
-    public TransactionController(UserService userService) {
+    public TransactionController(Repo repo, UserService userService, JwtService jwtService) {
+        this.repo = repo;
         this.userService = userService;
+        this.jwtService = jwtService;
+
     }
 
-    //TODO implement validateDeposit
-    public void validateDeposit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public int fetchId (HttpServletRequest req) {
+        jwtService.parseToken(req);
+        Principal principal = (Principal) req.getAttribute("principal");
+        return principal.getId();
+    }
+
+    public void balance(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        String amount = req.getParameter("amount");
 
-        double deposit_am = stringCurrencyToDouble(amount);//TODO: use this to update/check balance
+        //AppUser.Role role = principal.getRole(); //TODO If you need it here is how you access the role
 
-        String output = "Withdrew $" + deposit_am;
+        int curr_id = fetchId(req);
 
-        if(deposit_am <= 0){
-            writer.write("Invalid amount!");
-        }else{
-            writer.write(output);
-        }
+        UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
+        userAccount = (UserAccount) repo.select(userAccount).get(0);
+        double curr_bal = userAccount.getBalance();
+        String balance = String.valueOf(curr_bal);
+        writer.write(balance);
+        resp.setStatus(200);
     }
 
-
-    //TODO implement validateWithdrawal
-    public void validateWithdrawal(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
+    public void transactions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
-        String amount = req.getParameter("amount");
 
-        double withdraw_am = stringCurrencyToDouble(amount);//TODO: use this to update/check balance
+        int curr_id = fetchId(req);
+        UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
 
-        String output = "Withdrew $" + withdraw_am;
+        userAccount = (UserAccount) repo.select(userAccount).get(0);
 
-        if(withdraw_am <= 0){
-            writer.write("Invalid amount!");
-        }else{
-            writer.write(output);
+        int account_num = userAccount.getAccount_num();
+        int trans_num = 0;
+        Timestamp timestamp = null;
+        double change = 0;
+        double prev_bal = 0;
+
+
+        TransactionValues transactionValues = new TransactionValues(trans_num, account_num, prev_bal, change);
+        ArrayList arrayList = repo.select(transactionValues);
+        int i = 0;
+        for (Object o: arrayList) {
+            transactionValues = (TransactionValues) arrayList.get(i);
+            change = transactionValues.getChange();
+            prev_bal = transactionValues.getPrev_bal();
+            double post_bal = prev_bal + change;
+            timestamp = transactionValues.getTimestamp();
+            trans_num = transactionValues.getTrans_id();
+            account_num = transactionValues.getAccount_id();
+            String type = change > 0 ? "DEPOSIT" : "WITHDRAW";
+            writer.write("|| Transaction Number: " + trans_num + " || Account Number: " + account_num +
+                    " || Previous Balance: " + prev_bal + " || Net Change: " + change + " || Transaction type: " + type
+                    + " || Post balance: " + (post_bal) + "\n");
+            writer.write("+====================+");
+            i++;
+        }
+        resp.setStatus(200);
+    }
+
+    public void deposit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        //Acquire parameters
+        try {
+            DepositDTO deposit = mapper.readValue(req.getInputStream(), DepositDTO.class);
+            double deposit_am = deposit.getDeposit();
+            userService.validateDeposit(deposit_am);
+
+            int curr_id = fetchId(req);
+            UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
+            UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
+            int acc_num = selectedUserAccount.getAccount_num();
+            double prev_bal = selectedUserAccount.getBalance();
+            double updatedTotal = prev_bal + deposit_am;
+            selectedUserAccount.setBalance(updatedTotal);
+            selectedUserAccount.setId(curr_id);
+            repo.update(selectedUserAccount);
+
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, deposit_am);
+            repo.insert(transactionValues);
+            resp.setStatus(200);
+        } catch (NumberFormatException | IllegalAccessException e){
+            writer.write("Please enter a valid dollar amount! Must be of proper format");
+            resp.setStatus(400);
+        } catch (NegativeDepositException e){
+            resp.setStatus(400);
+            writer.write(e.getMessage());
         }
     }
+    public void withdrawal(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+        ObjectMapper mapper = new ObjectMapper();
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        //Acquire parameters
+
+        try {
+            WithdrawDTO withdraw = mapper.readValue(req.getInputStream(), WithdrawDTO.class);
+            double withdraw_am = withdraw.getWithdraw();
+            userService.validateWithdrawPos(withdraw_am);
 
 
+            int curr_id = fetchId(req);
+            UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
+            UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
+            int acc_num = selectedUserAccount.getAccount_num();
+            double prev_bal = selectedUserAccount.getBalance();
 
-    public String doubleToStringCurrency(double dValue){
-        String sValue = NumberFormat.getCurrencyInstance(Locale.US).format(dValue);
-        return sValue;
+            userService.validateWithdrawBal(withdraw_am, prev_bal);
+
+            double updatedTotal = prev_bal - withdraw_am;
+            selectedUserAccount.setBalance(updatedTotal);
+            selectedUserAccount.setId(curr_id);
+            repo.update(selectedUserAccount);
+
+            TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, (-1*withdraw_am));
+            repo.insert(transactionValues);
+            resp.setStatus(200);
+
+        } catch (NumberFormatException | IllegalAccessException e){
+            resp.setStatus(400);
+            writer.write("Please enter a valid dollar amount! Must be of proper format");
+        } catch (AttemptedOverdraftException | NegativeWithdrawalException e){
+            resp.setStatus(400);
+            writer.write(e.getMessage());
+        }
     }
-
-
-
-    public double stringCurrencyToDouble(String sValue){
-        double dValue = 0;
-        String noCommas = "";
-
-        noCommas = sValue.replace("$", "");//in case a '$' is in front of the string
-        noCommas = noCommas.replaceAll(",", "");//in case large number with commas is passed
-
-        dValue = Double.parseDouble(noCommas);
-        dValue = Precision.round(dValue, 2);
-
-        return dValue;
-    }
-
-
 }

@@ -1,11 +1,10 @@
 package controllers;
 
-
-
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import dtos.*;
 import exceptions.*;
+import io.jsonwebtoken.Claims;
 import models.*;
 import security.*;
 import services.*;
@@ -27,14 +26,21 @@ public class UserController {
         this.userService = userService;
         this.jwtConfig = jwtConfig;
         this.jwtService = jwtService;
-
     }
 
 
+    /**
+     * Registers a new user into the database.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException
+     */
     public void register(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
+
+        String errorMessage = "Null values were inputted, and are not valid!";
 
         try {
 
@@ -50,6 +56,8 @@ public class UserController {
                     userInfo.getLastName(),
                     userInfo.getDob());
 
+            userService.isUserValid(appUser);
+
             ArrayList<Object> registeredUser = userService.verifyRegistration(appUser);
 
             //using Jackson to map the user into a JSON
@@ -58,17 +66,23 @@ public class UserController {
         }catch(ResourceInvalidException | UsernameUnavailableException | EmailUnavailableException e){
             resp.setStatus(400);
             writer.write(e.getMessage());
-        }catch(Exception e){
+        }catch(NullPointerException e){
+            resp.setStatus(400);
+            writer.write(errorMessage);
+        }catch (Exception e){
             resp.setStatus(500);
             e.printStackTrace();
         }
     }
 
 
-
-
-    //TODO implement authenticate return void
-    public boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    /**
+     * Ensures the username and matching password is in the database.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException
+     */
+    public void authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         boolean result = false;
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
@@ -94,7 +108,6 @@ public class UserController {
             else
                 writer.write("Authentication succeeded!");
 
-
         }catch(AuthenticationException e){
             resp.setStatus(401);
             e.printStackTrace();
@@ -107,14 +120,15 @@ public class UserController {
             writer.write("Something went wrong!");
             e.printStackTrace();
         }
-
-
-
-        return result;
+        //return result;
     }
 
-    /*
-    Delete user based on unique value.
+
+    /**
+     * Deletes user data based on their username or email.
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws IOException in case input isn't valid
      */
     public void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -125,22 +139,29 @@ public class UserController {
             AppUser appUser = mapper.readValue(req.getInputStream(), AppUser.class);
 
             logger.info("Verifying deletion permission...");
-            //TODO: add boolean method userService.verifyDeletion(appUser);
 
-            logger.info("Attempting to delete user...");
-
-
-
-            //AppUser appuser1 = repo.select(appUser);
-            /*ArrayList<Object> userArray = repo.select(appUser);
-            writer.write(mapper.writeValueAsString(userArray));*/
-            //writer.write(mapper.writeValueAsString(appUser));
-            //repo.delete(appUser);
+            if(userService.verifyDeletion(appUser)) {//if user can be deleted, will set user's id from database
+                jwtService.parseToken(req);
+                //Claims jwtAttribute = (Claims) req.getUserPrincipal();
+                Principal principal = (Principal) req.getAttribute("principal");
+                if(userService.verifyToken(principal, appUser)) {
+                    userService.doDeletion(appUser);//do deletion
+                    writer.write("User data successfully deleted.");
+                }else{
+                    throw new IllegalAccessException();
+                }
+            }else{
+                throw new IllegalAccessException();
+            }
 
         } catch (MismatchedInputException e){
             logger.warn(e.getMessage());
-            writer.write("Mismatched input error!");
+            writer.write("Mismatched input error!  User data not deleted!");
             resp.setStatus(400);
+        } catch (IllegalAccessException | IllegalArgumentException e){
+            logger.warn(e.getMessage());
+            writer.write("You are not authorized to delete this!  User data not deleted!");
+            resp.setStatus(401);
         }
     }
 
