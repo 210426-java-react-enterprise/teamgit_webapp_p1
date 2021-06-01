@@ -90,7 +90,7 @@ public class TransactionController {
             double post_bal = prev_bal + change;
             timestamp = transactionValues.getTimestamp();
             trans_num = transactionValues.getTrans_id();
-            account_num = transactionValues.getAccount_id();
+            account_num = transactionValues.getAccount_num();
             String type = change > 0 ? "DEPOSIT" : "WITHDRAW";
             writer.write("|| Transaction Number: " + trans_num + " || Account Number: " + account_num +
                     " || Previous Balance: " + prev_bal + " || Net Change: " + change + " || Transaction type: " + type
@@ -115,12 +115,12 @@ public class TransactionController {
             int curr_id = fetchId(req);
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
-            int acc_num = selectedUserAccount.getAccount_num();
             double prev_bal = selectedUserAccount.getBalance();
             double updatedTotal = prev_bal + deposit_am;
             selectedUserAccount.setBalance(updatedTotal);
             selectedUserAccount.setId(curr_id);
             repo.update(selectedUserAccount);
+            int acc_num = selectedUserAccount.getAccount_num();
 
             TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, deposit_am);
             repo.insert(transactionValues);
@@ -149,15 +149,15 @@ public class TransactionController {
             int curr_id = fetchId(req);
             UserAccount userAccount = new UserAccount(0, curr_id, 0.00);
             UserAccount selectedUserAccount = (UserAccount) repo.select(userAccount).get(0);
-            int acc_num = selectedUserAccount.getAccount_num();
-            double prev_bal = selectedUserAccount.getBalance();
 
+            double prev_bal = selectedUserAccount.getBalance();
             userService.validateWithdrawBal(withdraw_am, prev_bal);
 
             double updatedTotal = prev_bal - withdraw_am;
             selectedUserAccount.setBalance(updatedTotal);
             selectedUserAccount.setId(curr_id);
             repo.update(selectedUserAccount);
+            int acc_num = selectedUserAccount.getAccount_num();
 
             TransactionValues transactionValues = new TransactionValues(0, acc_num, prev_bal, (-1*withdraw_am));
             repo.insert(transactionValues);

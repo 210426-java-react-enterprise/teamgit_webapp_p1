@@ -21,17 +21,17 @@ public class TransactionValues {
     )
     private int trans_id;
     @ForeignKey(
-            name = "account_id",
+            name = "account_num",
             references = "accounts"
     )
     @Column(
-            name = "account_id",
+            name = "account_num",
             type = "int",
             nullable = false,
             unique = false,
             updateable = false
     )
-    private int account_id;
+    private int account_num;
 
     @Column(
             name = "prev_bal",
@@ -65,9 +65,9 @@ public class TransactionValues {
 
     }
 
-    public TransactionValues(int trans_id, int account_id, double prev_bal, double change) {
+    public TransactionValues(int trans_id, int account_num, double prev_bal, double change) {
         this.trans_id = trans_id;
-        this.account_id = account_id;
+        this.account_num = account_num;
         this.prev_bal = prev_bal;
         this.change = change;
     }
@@ -78,8 +78,8 @@ public class TransactionValues {
     }
 
     @Getter
-    public int getAccount_id() {
-        return account_id;
+    public int getAccount_num() {
+        return account_num;
     }
 
     @Getter
@@ -105,10 +105,10 @@ public class TransactionValues {
     }
 
     @Setter(
-            name = "account_id"
+            name = "account_num"
     )
-    public void setAccount_id(int account_id) {
-        this.account_id = account_id;
+    public void setAccount_num(int account_num) {
+        this.account_num = account_num;
     }
 
     @Setter(
