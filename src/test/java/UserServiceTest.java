@@ -1,8 +1,13 @@
+
+import exceptions.AttemptedOverdraftException;
+import exceptions.NegativeDepositException;
+import exceptions.NegativeWithdrawalException;
 import dtos.Principal;
 import models.*;
 import org.junit.*;
 import repos.*;
 import services.*;
+
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -47,7 +52,6 @@ public class UserServiceTest {
     }
 
 
-
     //Tests if the isUserValid() method in UserService working
     @Test
     public void test_IsUserValidWithInvalidCredentials() {
@@ -87,42 +91,53 @@ public class UserServiceTest {
 
 
     @Test
-    public void test_verifyDeposit(){ }
+    public void test_validateDepositValid() throws IllegalAccessException {
+        try {
+            sut.validateDeposit(21.12);
 
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(1)).update(any());
+        }
+    }
 
     @Test
-    public void test_verifyWithdrawal(){ }
+    public void test_validateDepositNegative() throws IllegalAccessException {
+        try {
+            sut.validateDeposit(-21.12);
 
+        } catch (NegativeDepositException e){
+            verify(mockRepo, times(0)).update(any());
+        }
+    }
 
     @Test
-    public void test_authenticateUserCredentials(){
-        AppUser appUser = new AppUser("swekevin"
-                ,"password123","kevin@revature.net"
-                ,"Kevin","Chang", "1999-11-09");
+    public void test_validateWithdrawalValid() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawPos(21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(1)).update(any());
+        }
+    }
 
-        String username = "swekevin";
-        String password = "password123";
-
-        ArrayList<Object> mockArray = new ArrayList<>();
-        mockArray.add(appUser);
-
-        when(mockRepo.select(any())).thenReturn(mockArray);
-        assertEquals(appUser, sut.authenticateUserCredentials(username, password));
-
-        password = "bsPassword";//password doesn't match
-        assertNull(sut.authenticateUserCredentials(username, password));
-
-        username = "bsUsername";//username doesn't match
-        password = "password123";//password matches
-        assertNull(sut.authenticateUserCredentials(username, password));
-
-        password = "bsPassword";//neither username or password should match at this point
-        assertNull(sut.authenticateUserCredentials(username, password));
-        verify(mockRepo, times(4)).select(any());
+    @Test
+    public void test_validateWithdrawalNegative() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawPos(-21.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e){
+            verify(mockRepo, times(0)).update(any());
+        }
     }
 
 
     @Test
+    public void test_validateWithdrawalOverdraft() throws IllegalAccessException {
+        try {
+            sut.validateWithdrawBal(40.00,41.12);
+        } catch (NegativeWithdrawalException | AttemptedOverdraftException e) {
+            verify(mockRepo, times(0)).update(any());
+        }
+        verify(mockRepo, times(0)).update(any());
+      
     public void test_verifyUserDeletion() throws IllegalAccessException {
         AppUser appUser = new AppUser("swekevin"
                 ,"password123","kevin@revature.net"
@@ -169,6 +184,7 @@ public class UserServiceTest {
 
         verify(mockRepo, times(1)).delete(any());//make sure delete was only ran once
     }
+
 
 
 }

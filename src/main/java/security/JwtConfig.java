@@ -16,12 +16,12 @@ public class JwtConfig {
     public static String PREFIX;
     private static String SECRET_KEY;
     //makes a day
-    public final int EXPIRATION = 24*60*60*1000;
+    public final int EXPIRATION = 24 * 60 * 60 * 1000;
     private static final SignatureAlgorithm sigAlg = SignatureAlgorithm.HS256;
     private static Key signingKey = null;
 
 
-    static{
+    static {
         try {
             Properties props = new Properties();
             InputStream is = Thread.currentThread()
@@ -40,7 +40,8 @@ public class JwtConfig {
             e.printStackTrace();
         }
     }
-    public JwtConfig(){
+
+    public JwtConfig() {
 
     }
 
@@ -65,3 +66,4 @@ public class JwtConfig {
     }
 
 }
+
