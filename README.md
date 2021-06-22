@@ -1,4 +1,4 @@
-# Banking Applicatoin Webapp
+# Banking Application Webapp
 This banking webapp contains functionality to to allow users to deposit, withraw, and keep track of their transactions and balances.
 
 # Technologies Used
