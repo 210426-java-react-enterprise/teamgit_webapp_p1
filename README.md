@@ -50,6 +50,6 @@ Once the dependency is setup, and you want to try out the webapp, you can then i
 
 
 # Contributors
-Kevin Chang  
+Khloe Chang  
 Christopher Levano  
 Thomas Diendorf
